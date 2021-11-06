@@ -1,0 +1,6 @@
+# IDE folders
+.idea
+
+# dev folders
+venv
+__pycache__
