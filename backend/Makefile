@@ -1,5 +1,5 @@
 black:
-	black -l 120 -t py39 .
+	black -l 120 -t py39 tsa/ cli/
 
 build-requirements:
 	pip install pip-tools

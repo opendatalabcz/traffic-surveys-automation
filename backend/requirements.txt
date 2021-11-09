@@ -16,6 +16,8 @@ certifi==2021.10.8
     # via requests
 charset-normalizer==2.0.7
     # via requests
+click==8.0.3
+    # via -r requirements.in
 cycler==0.11.0
     # via matplotlib
 flatbuffers==2.0
