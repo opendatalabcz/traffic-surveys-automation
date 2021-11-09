@@ -14,7 +14,7 @@ def save_as_video(
     video_frame_rate: int,
     video_resolution: Tuple[int, int],  # resolution in form (width, height)
 ):
-    output = cv2.VideoWriter(video_name, cv2.VideoWriter_fourcc(*"mp4v"), video_frame_rate, video_resolution)
+    output = cv2.VideoWriter(video_name, cv2.VideoWriter_fourcc(*"mp4v"), float(video_frame_rate), video_resolution)
 
     for frame, bboxes, classes, scores in model.predict(dataset):
         bboxes = bboxes.numpy() * np.array([*reversed(video_resolution), *reversed(video_resolution)])
