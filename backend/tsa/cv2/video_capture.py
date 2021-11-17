@@ -1,5 +1,4 @@
-from contextlib import contextmanager
-from typing import Generator
+from typing import Generator, Tuple
 
 import cv2
 
@@ -11,18 +10,16 @@ class VideoCapture:
         self._read_frames = 0
         self._video = cv2.VideoCapture(file_path)
 
-    @classmethod
-    @contextmanager
-    def from_file(cls, file_path: str) -> "VideoCapture":
-        video_capture = cls(file_path)
-        try:
-            yield video_capture
-        finally:
-            video_capture.release()
-
     @property
     def frame_rate(self) -> float:
         return self._video.get(cv2.CAP_PROP_FPS)
+
+    @property
+    def resolution(self) -> Tuple[int, int]:
+        """Video resolution as (width, height)."""
+        width = self._video.get(cv2.CAP_PROP_FRAME_WIDTH)
+        height = self._video.get(cv2.CAP_PROP_FRAME_HEIGHT)
+        return int(width), int(height)
 
     def read_frames(self, rate: int = 1) -> Generator[NP_FRAME, None, None]:
         while True:
@@ -34,5 +31,8 @@ class VideoCapture:
             else:
                 break
 
-    def release(self):
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
         self._video.release()

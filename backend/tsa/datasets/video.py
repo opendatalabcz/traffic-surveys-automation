@@ -1,7 +1,7 @@
 from typing import Generator, Optional
 
 from tsa import typing
-from tsa.cv2_utils import VideoCapture
+from tsa.cv2.video_capture import VideoCapture
 from tsa.datasets.abstract import FramesDataset
 
 
@@ -22,7 +22,7 @@ class VideoDataset(FramesDataset):
     @property
     def frames(self) -> Generator[typing.NP_FRAME, None, None]:
         yielded_frames = 0
-        with VideoCapture.from_file(self.file_path) as video:
+        with VideoCapture(self.file_path) as video:
             # compute the rate at which the frames are yielded
             frame_rate = int(video.frame_rate / (self.frame_rate or video.frame_rate))
 
