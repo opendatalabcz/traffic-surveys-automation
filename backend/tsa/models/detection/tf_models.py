@@ -1,4 +1,3 @@
-from abc import abstractmethod
 from urllib.parse import urljoin
 
 import tensorflow as tf
@@ -6,21 +5,15 @@ import tensorflow_hub as tf_hub
 
 from tsa.constants import TF_HUB
 from tsa.datasets.abstract import FramesDataset
-from tsa.models.abstract import PredictableModel
+from tsa.models import PredictableModel
 
 
-class DetectionModel(PredictableModel):
+class TFObjectDetectionModel(PredictableModel):
     model_url: str
-    filtered_labels: tf.Tensor
 
-    def __init__(
-        self,
-        max_outputs: int = 100,
-        iou_threshold: float = 0.5,
-        score_threshold: float = 0.5,
-    ):
-        # download the model
-        self.model = tf_hub.load(urljoin(TF_HUB, self.model_url))
+    def __init__(self, max_outputs: int = 100, iou_threshold: float = 0.5, score_threshold: float = 0.5):
+        # initialize the model lazily when requested
+        self._model = None
         # define non-max-suppression config
         self.non_max_suppression_config = {
             "max_output_size": max_outputs,
@@ -28,7 +21,14 @@ class DetectionModel(PredictableModel):
             "score_threshold": score_threshold,
         }
         # constant for filtering
+        self.filtered_labels = tf.constant([2, 3, 4, 6, 8])
         self.tile_multiples = [1, tf.shape(self.filtered_labels)[0]]
+
+    @property
+    def model(self):
+        if self._model is None:
+            self._model = tf_hub.load(urljoin(TF_HUB, self.model_url))
+        return self._model
 
     def predict(self, dataset: FramesDataset):
         for frame in dataset.frames:
@@ -42,13 +42,13 @@ class DetectionModel(PredictableModel):
         bboxes, classes, scores = self._apply_non_max_suppression(bboxes, classes, scores)
         return frame, bboxes, classes, scores
 
-    @abstractmethod
-    def _get(self, prediction):
-        pass
+    @staticmethod
+    def _get(prediction):
+        return prediction["detection_boxes"][0], prediction["detection_classes"][0], prediction["detection_scores"][0]
 
-    @abstractmethod
-    def _cast(self, bboxes, classes, scores):
-        pass
+    @staticmethod
+    def _cast(bboxes, classes, scores):
+        return bboxes, tf.cast(classes, tf.int32), scores
 
     def _filter(self, bboxes, classes, scores):
         mask = tf.tile(tf.expand_dims(classes, -1), self.tile_multiples)
@@ -64,12 +64,9 @@ class DetectionModel(PredictableModel):
         )
 
 
-class FasterRCNNResnet(DetectionModel):
+class TFFasterRCNNResnet(TFObjectDetectionModel):
     model_url = "tensorflow/faster_rcnn/resnet152_v1_1024x1024/1"
-    filtered_labels = tf.constant([2, 3, 4, 6, 8])
 
-    def _get(self, prediction):
-        return prediction["detection_boxes"][0], prediction["detection_classes"][0], prediction["detection_scores"][0]
 
-    def _cast(self, bboxes, classes, scores):
-        return bboxes, tf.cast(classes, tf.int32), scores
+class TFEfficientDet(TFObjectDetectionModel):
+    model_url = "tensorflow/efficientdet/d5/1"

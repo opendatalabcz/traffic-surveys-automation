@@ -72,5 +72,5 @@ jobs:
           passphrase: ${{ secrets.RCI_PASSPHRASE }}
           script: |
             ml singularity
-            singularity pull docker://${{ steps.meta.outputs.tags }}
+            singularity pull -F docker://${{ steps.meta.outputs.tags }}
           username: ${{ secrets.RCI_USERNAME }}

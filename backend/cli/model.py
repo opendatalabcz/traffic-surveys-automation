@@ -3,7 +3,7 @@ from typing import Optional
 import click
 
 from tsa.datasets.video import VideoDataset
-from tsa.models.detection import FasterRCNNResnet
+from tsa.models.detection import EfficientDet
 from tsa.utils import save_as_video
 
 
@@ -39,7 +39,7 @@ def run_model(
     dataset_path: str, output_path: str, output_frame_rate: Optional[int] = None, max_frames: Optional[int] = None
 ):
     dataset = VideoDataset(dataset_path, output_frame_rate, max_frames)
-    model = FasterRCNNResnet()
+    model = EfficientDet()
 
     save_as_video(model, dataset, output_path, output_frame_rate, (1280, 720))
 
