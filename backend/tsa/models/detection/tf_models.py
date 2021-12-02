@@ -5,6 +5,7 @@ import tensorflow_hub as tf_hub
 
 from tsa.constants import TF_HUB
 from tsa.datasets.abstract import FramesDataset
+from tsa.bbox import BBox
 from tsa.models import PredictableModel
 
 
@@ -40,7 +41,7 @@ class TFObjectDetectionModel(PredictableModel):
         bboxes, classes, scores = self._cast(bboxes, classes, scores)
         bboxes, classes, scores = self._filter(bboxes, classes, scores)
         bboxes, classes, scores = self._apply_non_max_suppression(bboxes, classes, scores)
-        return frame, bboxes, classes, scores
+        return frame, BBox.from_tensor_list(bboxes, *frame.shape[:2]), classes, scores
 
     @staticmethod
     def _get(prediction):
