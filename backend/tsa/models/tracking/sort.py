@@ -9,6 +9,7 @@ from scipy.optimize import linear_sum_assignment
 
 from tsa.bbox import BBox
 from tsa.cv2.kalman_tracker import KalmanTracker
+from tsa.logging import log
 from tsa.models import TrackableModel
 
 
@@ -39,7 +40,7 @@ def iou_batch(bb_test, bb_gt):
     return o
 
 
-def associate_detections_to_trackers(detections, trackers, iou_threshold=0.3):
+def associate_detections_to_trackers(detections, trackers, iou_threshold):
     """
     Assigns detections to tracked object (both represented as bounding boxes)
     Returns 3 lists of matches, unmatched_detections and unmatched_trackers
@@ -92,6 +93,7 @@ class SORT(TrackableModel):
         self.frame_count = 0
         self.active_trackers: List[KalmanTracker] = []
 
+    @log()
     def track(self, detections: List[BBox]):
         self.frame_count += 1
         numpy_detections = np.array([detection.to_rectangle() for detection in detections])
@@ -99,7 +101,7 @@ class SORT(TrackableModel):
         predictions = self._existing_trackers_predictions()
         # match predictions with detections
         matched, unmatched_detections, unmatched_trackers = associate_detections_to_trackers(
-            numpy_detections, predictions
+            numpy_detections, predictions, 0.5
         )
         # update existing and matched trackers
         for m in matched:

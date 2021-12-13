@@ -1,3 +1,6 @@
+# MACOS files
+.DS_Store
+
 # IDE folders
 .idea
 

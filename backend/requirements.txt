@@ -107,6 +107,8 @@ six==1.16.0
     #   keras-preprocessing
     #   python-dateutil
     #   tensorflow
+structlog==21.4.0
+    # via -r requirements.in
 tensorboard==2.7.0
     # via tensorflow
 tensorboard-data-server==0.6.1

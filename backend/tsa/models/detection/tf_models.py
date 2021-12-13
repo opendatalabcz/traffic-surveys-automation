@@ -6,6 +6,7 @@ import tensorflow_hub as tf_hub
 from tsa.constants import TF_HUB
 from tsa.datasets.abstract import FramesDataset
 from tsa.bbox import BBox
+from tsa.logging import log
 from tsa.models import PredictableModel
 
 
@@ -35,6 +36,7 @@ class TFObjectDetectionModel(PredictableModel):
         for frame in dataset.frames:
             yield self._predict(frame)
 
+    @log()
     def _predict(self, frame):
         prediction = self.model([frame])
         bboxes, classes, scores = self._get(prediction)
@@ -44,6 +46,7 @@ class TFObjectDetectionModel(PredictableModel):
         return frame, BBox.from_tensor_list(bboxes, *frame.shape[:2]), classes, scores
 
     @staticmethod
+    @log()
     def _get(prediction):
         detection_boxes = prediction["detection_boxes"][0]
         detection_boxes = tf.stack(
@@ -52,14 +55,17 @@ class TFObjectDetectionModel(PredictableModel):
         return detection_boxes, prediction["detection_classes"][0], prediction["detection_scores"][0]
 
     @staticmethod
+    @log()
     def _cast(bboxes, classes, scores):
         return bboxes, tf.cast(classes, tf.int32), scores
 
+    @log()
     def _filter(self, bboxes, classes, scores):
         mask = tf.tile(tf.expand_dims(classes, -1), self.tile_multiples)
         mask = tf.reduce_any(tf.equal(mask, self.filtered_labels), -1)
         return tf.boolean_mask(bboxes, mask), tf.boolean_mask(classes, mask), tf.boolean_mask(scores, mask)
 
+    @log()
     def _apply_non_max_suppression(self, bboxes, classes, scores):
         non_max_suppression = tf.image.non_max_suppression(bboxes, scores, **self.non_max_suppression_config)
         return (
