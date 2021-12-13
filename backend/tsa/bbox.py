@@ -6,6 +6,23 @@ import tensorflow as tf
 from tsa.typing import IMAGE_SHAPE
 
 
+def center_to_bbox(center):
+    center_x, center_y, area, ratio = center
+    width = np.sqrt(area * ratio)
+    height = area / width
+    x1, x2 = center_x - width / 2.0, center_x + width / 2.0
+    y1, y2 = center_y - height / 2.0, center_y + height / 2.0
+    return np.array([x1, y1, x2, y2], dtype=np.float32), (width, height)
+
+
+def bbox_to_center(bbox):
+    x1, y1, x2, y2 = bbox
+    width, height = x2 - x1, y2 - y1
+    center_x, center_y = x1 + width / 2.0, y1 + height / 2.0
+    area, ratio = width * height, width / height
+    return np.array([center_x, center_y, area, ratio], dtype=np.float32)
+
+
 class BBox:
     """Representation of a single bounding box.
 
@@ -22,7 +39,7 @@ class BBox:
         """
         # multiplication matrix for adjusting bbox to the provided size
         self.size = (
-            tf.constant([*reversed(size), *reversed(size)], dtype=tf.float32)
+            tf.constant([*size, *size], dtype=tf.float32)
             if size is not None
             else tf.constant([1, 1, 1, 1], dtype=tf.float32)
         )
@@ -30,16 +47,13 @@ class BBox:
 
     @classmethod
     def from_tensor_list(cls, tensor, image_height: int, image_width: int) -> List["BBox"]:
+        """Initialize a list of bboxes with tensor containing 4 rows (x1, y1, x2, y2)."""
         return list(map(lambda bbox: cls(bbox, (image_width, image_height)), tensor))
 
     @classmethod
     def from_numpy_center(cls, center) -> "BBox":
-        center_x, center_y, area, ratio = center
-        width = np.sqrt(area * ratio)
-        height = area / width
-        x1, x2 = center_x - width / 2.0, center_x + width / 2.0
-        y1, y2 = center_y / height / 2.0, center_y + height / 2.0
-        return cls(tf.constant([y1, x1, y2, x2]), (width, height))
+        bbox, size = center_to_bbox(center)
+        return cls(tf.constant(bbox, dtype=tf.float32))
 
     @property
     def scaled_bbox(self):
@@ -47,13 +61,8 @@ class BBox:
 
     def to_numpy_center(self):
         """Returns scaled numpy array of (centerX, centerY, area, aspect ratio)."""
-        y1, x1, y2, x2 = self.scaled_bbox.numpy()
-        width, height = x2 - x1, y2 - y1
-        center_x, center_y = x1 + width / 2.0, y1 + height / 2.0
-        area, ratio = width * height, width / height
-        return np.array([center_x, center_y, area, ratio])
+        return bbox_to_center(self.scaled_bbox.numpy())
 
     def to_rectangle(self):
         """Returns scaled numpy array if (leftX, leftY), (rightX, rightY)."""
-        y1, x1, y2, x2 = self.scaled_bbox.numpy().astype(np.int32)
-        return (x1, y1), (x2, y2)
+        return self.scaled_bbox.numpy().astype(np.int32)

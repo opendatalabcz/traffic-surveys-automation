@@ -45,7 +45,11 @@ class TFObjectDetectionModel(PredictableModel):
 
     @staticmethod
     def _get(prediction):
-        return prediction["detection_boxes"][0], prediction["detection_classes"][0], prediction["detection_scores"][0]
+        detection_boxes = prediction["detection_boxes"][0]
+        detection_boxes = tf.stack(
+            (detection_boxes[:, 1], detection_boxes[:, 0], detection_boxes[:, 3], detection_boxes[:, 2]), axis=1
+        )  # switch width and height columns
+        return detection_boxes, prediction["detection_classes"][0], prediction["detection_scores"][0]
 
     @staticmethod
     def _cast(bboxes, classes, scores):

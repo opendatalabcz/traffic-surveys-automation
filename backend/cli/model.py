@@ -4,6 +4,7 @@ import click
 
 from tsa.datasets.video import VideoDataset
 from tsa.models.detection import TFEfficientDet
+from tsa.models.tracking import SORT
 from tsa.utils import save_as_video
 
 
@@ -39,9 +40,10 @@ def run_model(
     dataset_path: str, output_path: str, output_frame_rate: Optional[int] = None, max_frames: Optional[int] = None
 ):
     dataset = VideoDataset(dataset_path, output_frame_rate, max_frames)
-    model = TFEfficientDet()
+    prediction_model = TFEfficientDet()
+    tracking_model = SORT()
 
-    save_as_video(model, dataset, output_path, output_frame_rate, (1280, 720))
+    save_as_video(prediction_model, tracking_model, dataset, output_path, output_frame_rate, (1280, 720))
 
 
 cli.add_command(run_model)

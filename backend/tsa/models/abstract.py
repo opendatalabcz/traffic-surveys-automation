@@ -9,3 +9,9 @@ class PredictableModel:
     @abstractmethod
     def predict(self, dataset: FramesDataset) -> Tuple[Any, List[BBox], Any, Any]:
         pass
+
+
+class TrackableModel:
+    @abstractmethod
+    def track(self, detections):
+        pass
