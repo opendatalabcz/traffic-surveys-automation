@@ -1,4 +1,3 @@
-#FROM python:3.9-slim-buster
 FROM tensorflow/tensorflow:2.7.0-gpu
 
 WORKDIR /app

@@ -40,7 +40,7 @@ def iou_batch(bb_test, bb_gt):
     return o
 
 
-def associate_detections_to_trackers(detections, trackers, iou_threshold):
+def associate_detections_to_trackers(detections, trackers, iou_threshold: float):
     """
     Assigns detections to tracked object (both represented as bounding boxes)
     Returns 3 lists of matches, unmatched_detections and unmatched_trackers

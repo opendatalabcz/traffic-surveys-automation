@@ -46,9 +46,10 @@ class BBox:
         self.bbox = bbox
 
     @classmethod
-    def from_tensor_list(cls, tensor, image_height: int, image_width: int) -> List["BBox"]:
+    def from_tensor_list(cls, tensor, image_height: Optional[int], image_width: Optional[int]) -> List["BBox"]:
         """Initialize a list of bboxes with tensor containing 4 rows (x1, y1, x2, y2)."""
-        return list(map(lambda bbox: cls(bbox, (image_width, image_height)), tensor))
+        size = (image_width, image_height) if image_height and image_width else None
+        return list(map(lambda bbox: cls(bbox, size), tensor))
 
     @classmethod
     def from_numpy_center(cls, center) -> "BBox":

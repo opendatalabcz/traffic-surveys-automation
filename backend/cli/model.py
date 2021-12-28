@@ -2,10 +2,10 @@ from typing import Optional
 
 import click
 
-from tsa.datasets.video import VideoDataset
-from tsa.models.detection import TFEfficientDet
+from tsa.datasets import VideoFramesDataset
+from tsa.models.detection import EfficientDetD6
 from tsa.models.tracking import SORT
-from tsa.utils import save_as_video
+from tsa.exporter import save_as_video
 
 
 @click.group()
@@ -39,8 +39,8 @@ def cli():
 def run_model(
     dataset_path: str, output_path: str, output_frame_rate: Optional[int] = None, max_frames: Optional[int] = None
 ):
-    dataset = VideoDataset(dataset_path, output_frame_rate, max_frames)
-    prediction_model = TFEfficientDet()
+    dataset = VideoFramesDataset(dataset_path, output_frame_rate, max_frames)
+    prediction_model = EfficientDetD6()
     tracking_model = SORT()
 
     save_as_video(prediction_model, tracking_model, dataset, output_path, output_frame_rate, (1280, 720))
