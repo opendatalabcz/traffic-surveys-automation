@@ -1,3 +1,3 @@
-from .abstract import PredictableModel
+from .abstract import PredictableModel, TrackableModel
 
-__all__ = ["PredictableModel"]
+__all__ = ["PredictableModel", "TrackableModel"]

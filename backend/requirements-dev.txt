@@ -13,7 +13,9 @@ argon2-cffi==21.1.0
 astroid==2.8.4
     # via pylint
 attrs==21.2.0
-    # via jsonschema
+    # via
+    #   jsonschema
+    #   pytest
 backcall==0.2.0
     # via ipython
 black==21.10b0
@@ -34,6 +36,8 @@ entrypoints==0.3
     # via
     #   jupyter-client
     #   nbconvert
+iniconfig==1.1.1
+    # via pytest
 ipykernel==6.5.0
     # via
     #   ipywidgets
@@ -125,7 +129,9 @@ notebook==6.4.5
     #   jupyter
     #   widgetsnbextension
 packaging==21.2
-    # via bleach
+    # via
+    #   bleach
+    #   pytest
 pandocfilters==1.5.0
     # via nbconvert
 parso==0.8.2
@@ -140,6 +146,8 @@ platformdirs==2.4.0
     # via
     #   black
     #   pylint
+pluggy==1.0.0
+    # via pytest
 prometheus-client==0.12.0
     # via notebook
 prompt-toolkit==3.0.22
@@ -150,6 +158,8 @@ ptyprocess==0.7.0
     # via
     #   pexpect
     #   terminado
+py==1.11.0
+    # via pytest
 pycparser==2.21
     # via cffi
 pygments==2.10.0
@@ -165,6 +175,8 @@ pyparsing==2.4.7
     # via packaging
 pyrsistent==0.18.0
     # via jsonschema
+pytest==6.2.5
+    # via -r requirements-dev.in
 python-dateutil==2.8.2
     # via jupyter-client
 pyzmq==22.3.0
@@ -192,6 +204,7 @@ toml==0.10.2
     # via
     #   mypy
     #   pylint
+    #   pytest
 tomli==1.2.2
     # via black
 tornado==6.1

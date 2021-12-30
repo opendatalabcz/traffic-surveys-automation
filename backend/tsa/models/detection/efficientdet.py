@@ -1,4 +1,5 @@
-from typing import Generator
+from abc import ABC
+from typing import Generator, Tuple, Any, List
 
 import tensorflow as tf
 import tensorflow_hub as tf_hub
@@ -7,42 +8,41 @@ from tsa.datasets import FramesDataset
 from tsa.bbox import BBox
 from tsa.logging import log
 from tsa.models import PredictableModel
-from tsa.utils import batch
 
 
-class TFObjectDetectionModel(PredictableModel):
-    model_dir: str
-    model_url: str
+class EfficientDet(PredictableModel, ABC):
+    models_dir = "/Users/ondrejpudis/traffic_survey_automation/models"
+    model_path: str
 
     def __init__(self, max_outputs: int = 100, iou_threshold: float = 0.5, score_threshold: float = 0.5):
-        # initialize the model lazily when requested
-        self.batch_size = 1
-        self._model = None
+        super().__init__()
+        self.batch_size = 8
         # define non-max-suppression config
         self.non_max_suppression_config = {
             "max_output_size_per_class": 20,
             "max_total_size": max_outputs,
             "iou_threshold": iou_threshold,
             "score_threshold": score_threshold,
+            "clip_boxes": False,
         }
         # constant for filtering
         self.filtered_labels = tf.constant([2, 3, 4, 6, 8])
         self.tile_multiples = [1, 1, tf.shape(self.filtered_labels)[0]]
 
-    @property
-    def model(self):
-        if self._model is None:
-            self._model = tf_hub.KerasLayer(f"{self.model_dir}/saved_model")
-            # self._model = tf_hub.load(urljoin(TF_HUB, self.model_url))
-        return self._model
-
     def predict(self, dataset: FramesDataset) -> Generator:
-        for frames in batch(dataset.frames, self.batch_size):
+        tf_dataset = dataset.as_tf_dataset(self.batch_size)
+
+        for frames in tf_dataset:
             batch_bboxes, batch_classes, batch_scores = self._predict(frames)
             for frame, bboxes, classes, scores in zip(frames, batch_bboxes, batch_classes, batch_scores):
-                yield frame, BBox.from_tensor_list(bboxes, *frame.shape[:2]), classes, scores
+                yield frame.numpy(), BBox.from_tensor_list(bboxes, None, None), classes, scores
+
+    def _build_model(self):
+        saved_model = tf_hub.load(f"{self.models_dir}/{self.model_path}")
+        return saved_model.signatures["serving_default"]
 
     @log()
+    @tf.function()
     def _predict(self, frames):
         prediction = self.model(frames)
         bboxes, classes, scores = self._get(prediction)
@@ -53,7 +53,12 @@ class TFObjectDetectionModel(PredictableModel):
 
     @staticmethod
     def _get(prediction):
-        return prediction["detection_boxes"], prediction["detection_classes"], prediction["detection_scores"]
+        detections = prediction["detections:0"]
+        bboxes = tf.stack(
+            (detections[:, :, 1], detections[:, :, 2], detections[:, :, 3], detections[:, :, 4]),
+            axis=2,
+        )
+        return bboxes, detections[:, :, 6], detections[:, :, 5]
 
     def _filter(self, bboxes, classes, scores):
         mask = tf.tile(tf.expand_dims(tf.cast(classes, tf.int32), -1), self.tile_multiples)
@@ -80,6 +85,9 @@ class TFObjectDetectionModel(PredictableModel):
         return switched_bboxes, tf.cast(classes, tf.int32), scores
 
 
-class TFFasterRCNNResnet(TFObjectDetectionModel):
-    # model_url = "tensorflow/faster_rcnn/resnet152_v1_1024x1024/1"
-    model_dir = "/app/models/efficientdet_d6"
+class EfficientDetD6(EfficientDet):
+    model_path = "efficientdet-d6"
+
+
+class EfficientDetD5AdvPropAA(EfficientDet):
+    model_path = "efficientdet-d5-advprop-aa"

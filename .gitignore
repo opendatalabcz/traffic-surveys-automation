@@ -1,6 +1,10 @@
+# MACOS files
+.DS_Store
+
 # IDE folders
 .idea
 
 # dev folders
 venv
 __pycache__
+.pytest_cache

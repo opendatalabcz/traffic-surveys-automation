@@ -1,11 +1,32 @@
+from abc import abstractmethod
 from typing import Generator, Optional
+
+import tensorflow as tf
 
 from tsa import typing
 from tsa.cv2.video_capture import VideoCapture
-from tsa.datasets.abstract import FramesDataset
 
 
-class VideoDataset(FramesDataset):
+class FramesDataset:
+    output_shape = (None, None, 3)
+    output_tf_dtype = tf.uint8
+
+    @property
+    @abstractmethod
+    def frames(self) -> Generator[typing.NP_FRAME, None, None]:
+        pass
+
+    def as_tf_dataset(self, batch_size: int) -> tf.data.Dataset:
+        dataset = tf.data.Dataset.from_generator(
+            lambda: self.frames,
+            output_signature=tf.TensorSpec(self.output_shape, dtype=self.output_tf_dtype),
+        )
+        dataset = dataset.prefetch(tf.data.AUTOTUNE)
+        dataset = dataset.batch(batch_size)
+        return dataset
+
+
+class VideoFramesDataset(FramesDataset):
     def __init__(
         self, file_path: str, output_frame_rate: Optional[int] = None, max_yielded_frames: Optional[int] = None
     ):
