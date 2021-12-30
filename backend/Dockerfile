@@ -5,11 +5,13 @@ WORKDIR /app
 ENV PYTHONPATH /app
 
 RUN apt-get update &&\
-    apt-get install -y python3-opencv
+    apt-get install -y python3-opencv &&\
+    pip install poetry &&\
+    poetry config virtualenvs.create false
 
-COPY requirements.txt .
+COPY poetry.lock pyproject.toml ./
 
-RUN pip install --no-cache-dir -r requirements.txt
+RUN poetry install --no-dev
 
 COPY cli/ ./cli
 

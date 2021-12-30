@@ -1,0 +1,37 @@
+[tool.poetry]
+name = "traffic_survey_automator"
+version = "0.1.0"
+description = """
+    Backend for traffic survey automation sofware which uses deep learning and machine learning for detecting and
+    tracking vehilces in videos.
+"""
+license = "GPL-3.0-only"
+authors = ["Ondrej Pudiš <pudisond@fit.cvut.cz>"]
+repository = "https://github.com/opendatalabcz/traffic-surveys-automation"
+
+[tool.poetry.dependencies]
+click = "^8.0.3"
+matplotlib = "^3.5.1"
+numpy = "^1.21.5"
+opencv-python = "^4.5.5"
+python = ">=3.8, <3.10"
+scipy = "^1.7.3"
+structlog = "^21.5.0"
+tensorflow-hub = "^0.12.0"
+tensorflow = "^2.7.0"
+
+[tool.poetry.dev-dependencies]
+black = "^21.12b0"
+jupyter = "^1.0.0"
+mypy = "^0.930"
+pylint = "^2.12.2"
+pytest = "^6.2.5"
+poethepoet = "^0.11.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poe.tasks]
+black = "black -l 120 -t py39 tsa/ cli/"
+test = "pytest test/"
