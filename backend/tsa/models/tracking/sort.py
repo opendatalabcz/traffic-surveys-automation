@@ -2,14 +2,14 @@
 
 The code is inspired by https://github.com/abewley/sort.
 """
-from typing import List
+from typing import List, Optional, Tuple
 
 import numpy as np
 from scipy.optimize import linear_sum_assignment
 
+from tsa import typing
 from tsa.bbox import BBox
 from tsa.cv2.kalman_tracker import KalmanTracker
-from tsa.logging import log
 from tsa.models import TrackableModel
 
 
@@ -87,45 +87,68 @@ def associate_detections_to_trackers(detections, trackers, iou_threshold: float)
 
 
 class SORT(TrackableModel):
-    min_hits = 1
-
-    def __init__(self):
-        self.frame_count = 0
+    def __init__(self, min_hits: int, max_age: int, iou_threshold: float):
+        # init configurable algorithm variables
+        self.min_hits, self.max_age, self.iou_threshold, self.frame_count = min_hits, max_age, iou_threshold, 0
+        # prepare a list for storing active trackers
         self.active_trackers: List[KalmanTracker] = []
 
-    @log()
     def track(self, detections: List[BBox]):
         self.frame_count += 1
+        # convert input detection bboxes to a numpy array
         numpy_detections = np.array([detection.to_rectangle() for detection in detections])
-        # get predictions from the existing trackers
-        predictions = self._existing_trackers_predictions()
+        # get next bbox predictions from the existing trackers
+        predictions = self._predict_active_trackers()
         # match predictions with detections
         matched, unmatched_detections, unmatched_trackers = associate_detections_to_trackers(
-            numpy_detections, predictions, 0.5
+            numpy_detections, predictions, iou_threshold=self.iou_threshold
         )
-        # update existing and matched trackers
-        for m in matched:
-            self.active_trackers[m[1]].update(numpy_detections[m[0]])
+        boxes, ids = self._update_and_match_existing_trackers(matched, numpy_detections)
+        boxes, ids, new_boxes = self._add_unmatched_trackers(unmatched_trackers, boxes, ids)
+        # delete old trackers
+        for i in reversed(range(len(self.active_trackers))):
+            if self.active_trackers[i].age > self.max_age:
+                self.active_trackers.pop(i)
         # create new trackers
-        for u in unmatched_detections:
-            new_tracker = KalmanTracker(numpy_detections[u])
-            self.active_trackers.append(new_tracker)
-        # build and return final tracking
-        return self._build_tracking()
+        for i in unmatched_detections:
+            self.active_trackers.append(KalmanTracker(numpy_detections[i]))
+        return np.array(boxes, dtype=object), ids, new_boxes
 
-    def _existing_trackers_predictions(self):
+    def _predict_active_trackers(self):
         predictions = np.array([tracker.predict() for tracker in self.active_trackers])
         if predictions.size > 0:
             predictions = np.ma.compress_rows(np.ma.masked_invalid(predictions))
         return predictions
 
-    def _build_tracking(self):
-        results_shapes, results_ids = [], []
-        for tracker in self.active_trackers:
-            if tracker.time_since_update < 1 and (
-                tracker.hit_streak >= self.min_hits or self.frame_count <= self.min_hits
-            ):
-                results_shapes.append(tracker.state[:4].reshape((-1,)))
-                results_ids.append(tracker.id)
+    def _update_and_match_existing_trackers(
+        self, matches, detections
+    ) -> Tuple[List[Optional[typing.NP_ARRAY]], List[Optional[str]]]:
+        """Update the existing Kalman trackers, match them with proper detection positions."""
+        matched_boxes, matched_ids = [None] * detections.shape[0], [None] * detections.shape[0]
 
-        return np.array(results_shapes), results_ids
+        for detection_position, tracker_position in matches:
+            tracker, detection = self.active_trackers[tracker_position], detections[detection_position]
+
+            tracker.update(detection)
+
+            if self._is_tracker_active(tracker):
+                matched_boxes[detection_position] = tracker.state
+                matched_ids[detection_position] = tracker.id
+
+        return matched_boxes, matched_ids
+
+    def _add_unmatched_trackers(self, unmatched_trackers, boxes, ids):
+        new_number_of_boxes = 0
+
+        for tracker_position in unmatched_trackers:
+            tracker = self.active_trackers[tracker_position]
+
+            if self._is_tracker_active(tracker):
+                new_number_of_boxes += 1
+                boxes.append(tracker.state)
+                ids.append(tracker.id)
+
+        return boxes, ids, new_number_of_boxes
+
+    def _is_tracker_active(self, tracker: KalmanTracker) -> bool:
+        return tracker.hits >= self.min_hits and tracker.age <= self.max_age

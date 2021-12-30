@@ -41,7 +41,7 @@ def run_model(
 ):
     dataset = VideoFramesDataset(dataset_path, output_frame_rate, max_frames)
     prediction_model = EfficientDetD6()
-    tracking_model = SORT()
+    tracking_model = SORT(0, 3, 0.55)
 
     save_as_video(prediction_model, tracking_model, dataset, output_path, output_frame_rate, (1280, 720))
 

@@ -13,9 +13,7 @@ KF_MEASUREMENT_PARAMS = 4
 class KalmanTracker:
     def __init__(self, initial_bbox):
         # init identifiers and counters
-        self.id = uuid4()
-        self.hit_streak = 0
-        self.time_since_update = 0
+        self.id, self.hits, self.age = uuid4(), 0, 0
         # init kalman filter and its initial values
         self.kalman_filter = cv2.KalmanFilter(dynamParams=KF_DIMENSION_PARAMS, measureParams=KF_MEASUREMENT_PARAMS)
         self._init_kalman_filter_variables(bbox_to_center(initial_bbox))
@@ -23,17 +21,17 @@ class KalmanTracker:
     @property
     def state(self):
         bbox, _ = center_to_bbox(self.kalman_filter.statePost[:4])
-        return bbox
+        return bbox.reshape((-1,))
 
     def update(self, bbox):
-        self.hit_streak += 1
-        self.time_since_update = 0
+        self.hits += 1
+        self.age = 0
         self.kalman_filter.correct(bbox_to_center(bbox))
 
     def predict(self):
-        if self.time_since_update > 0:
-            self.hit_streak = 0
-        self.time_since_update += 1
+        if self.kalman_filter.statePost[6] + self.kalman_filter.statePost[2] <= 0:
+            self.kalman_filter.statePost[6] *= 0.0
+        self.age += 1
         prediction = self.kalman_filter.predict().reshape(1, -1)
         prediction, _ = center_to_bbox(prediction[0][:4])
         return prediction
