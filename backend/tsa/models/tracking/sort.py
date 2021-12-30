@@ -1,6 +1,8 @@
-"""Simple online and realtime tracking model implementation.
+"""Simple online and realtime tracking implementation.
 
-The code is inspired by https://github.com/abewley/sort.
+This follows the algorithm described in Bewley A. et al.: Simple Online and Realtime Tracking.
+DOI: 10.1109/ICIP.2016.7533003.
+GitHub repository: https://github.com/abewley/sort/tree/bce9f0d1fc8fb5f45bf7084130248561a3d42f31.
 """
 from typing import List, Optional, Tuple
 
@@ -12,15 +14,14 @@ from tsa.bbox import BBox
 from tsa.cv2.kalman_tracker import KalmanTracker
 from tsa.models import TrackableModel
 
-
-def linear_assignment(cost_matrix):
-    x, y = linear_sum_assignment(cost_matrix)
-    return np.array(list(zip(x, y)))
+MATCHED_BBOXES = List[Optional[typing.NP_ARRAY]]
+MATCHED_IDS = List[Optional[str]]
 
 
 def iou_batch(bb_test, bb_gt):
-    """
-    From SORT: Computes IOU between two bboxes in the form [x1,y1,x2,y2]
+    """Compute an intersection over union on a batch of bounding boxes.
+
+    Adopted from https://github.com/abewley/sort/blob/bce9f0d1fc8fb5f45bf7084130248561a3d42f31/sort.py#L47.
     """
     bb_gt = np.expand_dims(bb_gt, 0)
     bb_test = np.expand_dims(bb_test, 1)
@@ -41,9 +42,10 @@ def iou_batch(bb_test, bb_gt):
 
 
 def associate_detections_to_trackers(detections, trackers, iou_threshold: float):
-    """
-    Assigns detections to tracked object (both represented as bounding boxes)
-    Returns 3 lists of matches, unmatched_detections and unmatched_trackers
+    """Assigns detections to tracked object, both represented as bounding boxes.
+
+    Returns 3 lists of matches, unmatched_detections and unmatched_trackers.
+    Adopted from https://github.com/abewley/sort/blob/bce9f0d1fc8fb5f45bf7084130248561a3d42f31/sort.py#L154.
     """
     if len(trackers) == 0:
         return np.empty((0, 2), dtype=int), np.arange(len(detections)), np.empty((0, 5), dtype=int)
@@ -55,21 +57,16 @@ def associate_detections_to_trackers(detections, trackers, iou_threshold: float)
         if a.sum(1).max() == 1 and a.sum(0).max() == 1:
             matched_indices = np.stack(np.where(a), axis=1)
         else:
-            matched_indices = linear_assignment(-iou_matrix)
+            row_indices, col_indices = linear_sum_assignment(-iou_matrix)
+            matched_indices = np.array(list(zip(row_indices, col_indices)))
     else:
         matched_indices = np.empty(shape=(0, 2))
 
-    unmatched_detections = []
-    for d, det in enumerate(detections):
-        if d not in matched_indices[:, 0]:
-            unmatched_detections.append(d)
+    unmatched_detections = [d for d, det in enumerate(detections) if d not in matched_indices[:, 0]]
 
-    unmatched_trackers = []
-    for t, trk in enumerate(trackers):
-        if t not in matched_indices[:, 1]:
-            unmatched_trackers.append(t)
+    unmatched_trackers = [t for t, trk in enumerate(trackers) if t not in matched_indices[:, 1]]
 
-    # filter out matched with low IOU
+    # filter out matched with low IOU, move them to unmatched detections and trackers
     matches = []
     for m in matched_indices:
         if iou_matrix[m[0], m[1]] < iou_threshold:
@@ -89,12 +86,11 @@ def associate_detections_to_trackers(detections, trackers, iou_threshold: float)
 class SORT(TrackableModel):
     def __init__(self, min_hits: int, max_age: int, iou_threshold: float):
         # init configurable algorithm variables
-        self.min_hits, self.max_age, self.iou_threshold, self.frame_count = min_hits, max_age, iou_threshold, 0
+        self.min_hits, self.max_age, self.iou_threshold = min_hits, max_age, iou_threshold
         # prepare a list for storing active trackers
         self.active_trackers: List[KalmanTracker] = []
 
-    def track(self, detections: List[BBox]):
-        self.frame_count += 1
+    def track(self, detections: List[BBox]) -> Tuple[typing.NP_ARRAY, MATCHED_IDS, int]:
         # convert input detection bboxes to a numpy array
         numpy_detections = np.array([detection.to_rectangle() for detection in detections])
         # get next bbox predictions from the existing trackers
@@ -120,9 +116,7 @@ class SORT(TrackableModel):
             predictions = np.ma.compress_rows(np.ma.masked_invalid(predictions))
         return predictions
 
-    def _update_and_match_existing_trackers(
-        self, matches, detections
-    ) -> Tuple[List[Optional[typing.NP_ARRAY]], List[Optional[str]]]:
+    def _update_and_match_existing_trackers(self, matches, detections) -> Tuple[MATCHED_BBOXES, MATCHED_IDS]:
         """Update the existing Kalman trackers, match them with proper detection positions."""
         matched_boxes, matched_ids = [None] * detections.shape[0], [None] * detections.shape[0]
 
@@ -137,7 +131,8 @@ class SORT(TrackableModel):
 
         return matched_boxes, matched_ids
 
-    def _add_unmatched_trackers(self, unmatched_trackers, boxes, ids):
+    def _add_unmatched_trackers(self, unmatched_trackers, boxes, ids) -> Tuple[MATCHED_BBOXES, MATCHED_IDS, int]:
+        """Use existing trackers to predict next detections for vehicles that were missed by the detection model."""
         new_number_of_boxes = 0
 
         for tracker_position in unmatched_trackers:
