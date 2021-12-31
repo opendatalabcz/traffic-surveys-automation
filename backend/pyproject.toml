@@ -36,4 +36,3 @@ build-backend = "poetry.core.masonry.api"
 [tool.poe.tasks]
 black = "black -l 120 -t py39 tsa/ cli/"
 test = "pytest test/"
-run = "python cli/model.py run-model -d ../../datasets/jackson-hole_20210507_1.mp4 -o output.mp4 --max-frames 30 --output-frame-rate 15"
