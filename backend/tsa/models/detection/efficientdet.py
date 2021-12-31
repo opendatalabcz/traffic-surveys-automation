@@ -1,22 +1,22 @@
 from abc import ABC
-from typing import Generator, Tuple, Any, List
+from typing import Generator
 
 import tensorflow as tf
 import tensorflow_hub as tf_hub
 
-from tsa.datasets import FramesDataset
 from tsa.bbox import BBox
+from tsa.config import config
+from tsa.datasets import FramesDataset
 from tsa.logging import log
 from tsa.models import PredictableModel
 
 
 class EfficientDet(PredictableModel, ABC):
-    models_dir = "/Users/ondrejpudis/traffic_survey_automation/models"
     model_path: str
 
-    def __init__(self, max_outputs: int = 100, iou_threshold: float = 0.5, score_threshold: float = 0.5):
+    def __init__(self, max_outputs: int, iou_threshold: float, score_threshold: float, batch_size: int):
         super().__init__()
-        self.batch_size = 8
+        self.batch_size = batch_size
         # define non-max-suppression config
         self.non_max_suppression_config = {
             "max_output_size_per_class": 20,
@@ -38,7 +38,7 @@ class EfficientDet(PredictableModel, ABC):
                 yield frame.numpy(), BBox.from_tensor_list(bboxes, None, None), classes, scores
 
     def _build_model(self):
-        saved_model = tf_hub.load(f"{self.models_dir}/{self.model_path}")
+        saved_model = tf_hub.load(f"{config.MODELS_PATH}/{self.model_path}")
         return saved_model.signatures["serving_default"]
 
     @log()
