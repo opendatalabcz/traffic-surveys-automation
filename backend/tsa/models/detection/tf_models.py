@@ -7,7 +7,6 @@ from tsa.datasets import FramesDataset
 from tsa.bbox import BBox
 from tsa.logging import log
 from tsa.models import PredictableModel
-from tsa.utils import batch
 
 
 class TFObjectDetectionModel(PredictableModel):
@@ -37,7 +36,7 @@ class TFObjectDetectionModel(PredictableModel):
         return self._model
 
     def predict(self, dataset: FramesDataset) -> Generator:
-        for frames in batch(dataset.frames, self.batch_size):
+        for frames in dataset.frames:
             batch_bboxes, batch_classes, batch_scores = self._predict(frames)
             for frame, bboxes, classes, scores in zip(frames, batch_bboxes, batch_classes, batch_scores):
                 yield frame, BBox.from_tensor_list(bboxes, *frame.shape[:2]), classes, scores
