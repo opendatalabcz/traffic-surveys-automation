@@ -1,5 +1,10 @@
-from konfetti import env, Konfig
+from pathlib import Path
 
-MODELS_PATH = env("MODELS_PATH")
+from konfetti import Konfig
 
-config = Konfig.from_object(__name__)
+CONFIG_DIR = Path(__file__).parent
+
+config = Konfig.from_object("tsa.config.base")
+
+config.extend_with_json(CONFIG_DIR / "efficientdet.config.json")
+config.extend_with_json(CONFIG_DIR / "sort.config.json")
