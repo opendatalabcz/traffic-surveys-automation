@@ -1,7 +1,7 @@
 # Deep learning models
 
-This folder contains archives of deep learning models' checkpoints that are required for the backend application
-functionality.
+This document briefly introduces deep learning models used in this project, including information about how we
+created these models.
 
 ## Efficientdet models
 

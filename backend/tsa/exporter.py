@@ -2,6 +2,7 @@ from typing import Tuple
 
 import cv2
 import numpy as np
+import tensorflow as tf
 
 from tsa.datasets import FramesDataset
 from tsa.models.abstract import PredictableModel, TrackableModel
@@ -25,7 +26,9 @@ def save_as_video(
     for frame, bboxes, classes, scores in prediction_model.predict(dataset):
         detections, identifiers, new_boxes = tracking_model.track(bboxes)
         bboxes = bboxes + [None] * new_boxes
-        for bbox, detection, identifier in zip(bboxes, detections, identifiers):
+        classes = tf.concat((classes, tf.zeros_like((new_boxes,))), axis=0)
+        scores = tf.concat((scores, tf.zeros_like((new_boxes,), dtype=tf.float32)), axis=0)
+        for bbox, detection, identifier, class_, score in zip(bboxes, detections, identifiers, classes, scores):
             color = (255, 255, 255)
 
             if identifier is not None:
@@ -45,6 +48,14 @@ def save_as_video(
                 bbox_rectangle = bbox.to_rectangle()
                 cv2.rectangle(
                     frame, (bbox_rectangle[0], bbox_rectangle[1]), (bbox_rectangle[2], bbox_rectangle[3]), color, 2, 1
+                )
+                cv2.putText(
+                    frame,
+                    f"{class_}: {score}",
+                    (bbox_rectangle[0], bbox_rectangle[1]),
+                    cv2.FONT_HERSHEY_PLAIN,
+                    1,
+                    color,
                 )
         output.write(frame)
 

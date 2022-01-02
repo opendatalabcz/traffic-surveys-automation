@@ -1,0 +1,5 @@
+{
+  "SORT_MIN_HITS": 0,
+  "SORT_MAX_AGE": 3,
+  "SORT_IOU_THRESHOLD": 0.7
+}
