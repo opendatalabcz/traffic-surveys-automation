@@ -1,6 +1,6 @@
 import numpy as np
 import tensorflow as tf
-from numpy.testing import assert_array_equal
+from numpy.testing import assert_almost_equal, assert_array_equal
 
 from tsa.bbox import BBox
 
@@ -14,4 +14,4 @@ def test_bbox_from_tensor():
     assert len(bbox_list) == 2
     # the convert methods return the expected values
     assert_array_equal(bbox_list[0].to_rectangle(), np.array([640, 360, 768, 432]))
-    assert_array_equal(bbox_list[0].to_numpy_center()[:2], np.array([704, 396]))
+    assert_almost_equal(bbox_list[0].to_numpy_center(), np.array([704, 396, 1.77, 72]), decimal=2)

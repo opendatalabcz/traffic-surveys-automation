@@ -11,7 +11,7 @@ from scipy.optimize import linear_sum_assignment
 
 from tsa import typing
 from tsa.bbox import BBox
-from tsa.cv2.kalman_tracker import KalmanTracker
+from tsa.cv2.kalman_filter import KalmanFilter
 from tsa.models import TrackableModel
 
 MATCHED_BBOXES = List[Optional[typing.NP_ARRAY]]
@@ -91,7 +91,7 @@ class SORT(TrackableModel):
         # init configurable algorithm variables
         self.min_hits, self.max_age, self.iou_threshold = min_hits, max_age, iou_threshold
         # prepare a list for storing active trackers
-        self.active_trackers: List[KalmanTracker] = []
+        self.active_trackers: List[KalmanFilter] = []
 
     def track(self, detections: List[BBox]) -> Tuple[typing.NP_ARRAY, MATCHED_IDS, int]:
         # convert input detection bboxes to a numpy array
@@ -110,7 +110,7 @@ class SORT(TrackableModel):
                 self.active_trackers.pop(i)
         # create new trackers
         for i in unmatched_detections:
-            self.active_trackers.append(KalmanTracker(numpy_detections[i]))
+            self.active_trackers.append(KalmanFilter(numpy_detections[i]))
         return np.array(boxes, dtype=object), ids, new_boxes
 
     def _predict_active_trackers(self):
@@ -148,5 +148,5 @@ class SORT(TrackableModel):
 
         return boxes, ids, new_number_of_boxes
 
-    def _is_tracker_active(self, tracker: KalmanTracker) -> bool:
+    def _is_tracker_active(self, tracker: KalmanFilter) -> bool:
         return tracker.hits >= self.min_hits and tracker.age <= self.max_age
