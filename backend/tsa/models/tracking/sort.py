@@ -5,40 +5,18 @@ DOI: 10.1109/ICIP.2016.7533003.
 GitHub repository: https://github.com/abewley/sort/tree/bce9f0d1fc8fb5f45bf7084130248561a3d42f31.
 """
 from typing import List, Optional, Tuple
+from uuid import uuid4
 
 import numpy as np
 from scipy.optimize import linear_sum_assignment
 
-from tsa import typing
-from tsa.bbox import BBox
+from tsa import bbox, typing
 from tsa.cv2.kalman_filter import KalmanFilter
 from tsa.models import TrackableModel
+from tsa.np_utils import iou_batch
 
 MATCHED_BBOXES = List[Optional[typing.NP_ARRAY]]
 MATCHED_IDS = List[Optional[str]]
-
-
-def iou_batch(bb_test, bb_gt):
-    """Compute an intersection over union on a batch of bounding boxes.
-
-    Adopted from https://github.com/abewley/sort/blob/bce9f0d1fc8fb5f45bf7084130248561a3d42f31/sort.py#L47.
-    """
-    bb_gt = np.expand_dims(bb_gt, 0)
-    bb_test = np.expand_dims(bb_test, 1)
-
-    xx1 = np.maximum(bb_test[..., 0], bb_gt[..., 0])
-    yy1 = np.maximum(bb_test[..., 1], bb_gt[..., 1])
-    xx2 = np.minimum(bb_test[..., 2], bb_gt[..., 2])
-    yy2 = np.minimum(bb_test[..., 3], bb_gt[..., 3])
-    w = np.maximum(0.0, xx2 - xx1)
-    h = np.maximum(0.0, yy2 - yy1)
-    wh = w * h
-    o = wh / (
-        (bb_test[..., 2] - bb_test[..., 0]) * (bb_test[..., 3] - bb_test[..., 1])
-        + (bb_gt[..., 2] - bb_gt[..., 0]) * (bb_gt[..., 3] - bb_gt[..., 1])
-        - wh
-    )
-    return o
 
 
 def associate_detections_to_trackers(detections, trackers, iou_threshold: float):
@@ -86,31 +64,74 @@ def associate_detections_to_trackers(detections, trackers, iou_threshold: float)
     return matches, np.array(unmatched_detections), np.array(unmatched_trackers)
 
 
-class SORT(TrackableModel):
-    def __init__(self, min_hits: int, max_age: int, iou_threshold: float):
-        # init configurable algorithm variables
-        self.min_hits, self.max_age, self.iou_threshold = min_hits, max_age, iou_threshold
-        # prepare a list for storing active trackers
-        self.active_trackers: List[KalmanFilter] = []
+class Tracker:
+    def __init__(self, initial_position: typing.BBOX_COORDINATES, min_updates: int, max_age: int):
+        self.id, self.updates, self.predictions, self.time_since_update = uuid4(), 0, 0, 0
+        self.min_updates, self.max_time_since_update = min_updates, max_age
+        self.kalman_filter = KalmanFilter(bbox.bbox_to_center(initial_position))
 
-    def track(self, detections: List[BBox]) -> Tuple[typing.NP_ARRAY, MATCHED_IDS, int]:
+    @property
+    def state(self) -> typing.BBOX_COORDINATES:
+        bbox_prediction, _ = bbox.center_to_bbox(self.kalman_filter.state)
+        return bbox_prediction
+
+    @property
+    def is_active(self) -> bool:
+        return self.updates >= self.min_updates
+
+    @property
+    def is_deleted(self) -> bool:
+        return (
+            self.time_since_update > self.max_time_since_update or
+            (not self.is_active and self.updates != self.predictions)
+        )
+
+    def update(self, new_position: typing.BBOX_COORDINATES):
+        self.updates += 1
+        self.time_since_update = 0
+
+        self.kalman_filter.update(bbox.bbox_to_center(new_position))
+
+    def predict(self) -> typing.BBOX_COORDINATES:
+        self.predictions += 1
+
+        prediction = self.kalman_filter.predict()
+        bbox_prediction, _ = bbox.center_to_bbox(prediction)
+        return bbox_prediction
+
+
+class SORT(TrackableModel):
+    def __init__(self, min_updates: int, max_age: int, iou_threshold: float):
+        # init configurable algorithm variables
+        self.iou_threshold = iou_threshold
+        self.tracker_config = {"min_updates": min_updates, "max_age": max_age}
+        # prepare a list for storing active trackers
+        self.active_trackers: List[Tracker] = []
+
+    def track(self, detections: List[bbox.BBox]) -> Tuple[typing.NP_ARRAY, MATCHED_IDS, int]:
         # convert input detection bboxes to a numpy array
         numpy_detections = np.array([detection.to_rectangle() for detection in detections])
+
         # get next bbox predictions from the existing trackers
         predictions = self._predict_active_trackers()
+
         # match predictions with detections
         matched, unmatched_detections, unmatched_trackers = associate_detections_to_trackers(
             numpy_detections, predictions, iou_threshold=self.iou_threshold
         )
         boxes, ids = self._update_and_match_existing_trackers(matched, numpy_detections)
         boxes, ids, new_boxes = self._add_unmatched_trackers(unmatched_trackers, boxes, ids)
+
         # delete old trackers
         for i in reversed(range(len(self.active_trackers))):
-            if self.active_trackers[i].age > self.max_age:
+            if self.active_trackers[i].is_deleted:
                 self.active_trackers.pop(i)
+
         # create new trackers
         for i in unmatched_detections:
-            self.active_trackers.append(KalmanFilter(numpy_detections[i]))
+            new_tracker = Tracker(numpy_detections[i], **self.tracker_config)
+            self.active_trackers.append(new_tracker)
+
         return np.array(boxes, dtype=object), ids, new_boxes
 
     def _predict_active_trackers(self):
@@ -128,7 +149,7 @@ class SORT(TrackableModel):
 
             tracker.update(detection)
 
-            if self._is_tracker_active(tracker):
+            if tracker.is_active:
                 matched_boxes[detection_position] = tracker.state
                 matched_ids[detection_position] = tracker.id
 
@@ -141,12 +162,9 @@ class SORT(TrackableModel):
         for tracker_position in unmatched_trackers:
             tracker = self.active_trackers[tracker_position]
 
-            if self._is_tracker_active(tracker):
+            if tracker.is_active:
                 new_number_of_boxes += 1
                 boxes.append(tracker.state)
                 ids.append(tracker.id)
 
         return boxes, ids, new_number_of_boxes
-
-    def _is_tracker_active(self, tracker: KalmanFilter) -> bool:
-        return tracker.hits >= self.min_hits and tracker.age <= self.max_age

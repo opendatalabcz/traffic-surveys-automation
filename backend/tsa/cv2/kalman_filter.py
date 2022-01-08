@@ -1,5 +1,4 @@
 from collections import namedtuple
-from uuid import uuid4
 
 import cv2
 import numpy as np
@@ -23,8 +22,6 @@ class KalmanFilter:
     static_matrices: KalmanFilterStaticMatrices = None
 
     def __init__(self, initial_position: typing.BBOX_CENTER):
-        # init identifiers and counters
-        self.id, self.hits, self.age = uuid4(), 0, 0
         # init kalman filter and its initial values
         self.kalman_filter = cv2.KalmanFilter(dynamParams=10, measureParams=4)
         self._init_variables(
@@ -33,21 +30,18 @@ class KalmanFilter:
 
     @property
     def state(self) -> typing.BBOX_CENTER:
-        return self.kalman_filter.statePost[:4]
+        return self.kalman_filter.statePost[:4].reshape(-1,)
 
     @property
     def covariance(self):
         return self.kalman_filter.errorCovPost
 
     def update(self, new_measurement: typing.BBOX_CENTER):
-        self.hits += 1
-        self.age = 0
         self.kalman_filter.correct(new_measurement)
 
     def predict(self) -> typing.BBOX_CENTER:
-        self.age += 1
         prediction = self.kalman_filter.predict()
-        prediction = prediction.reshape(1, -1)[0]
+        prediction = prediction.reshape(-1,)
         return prediction[:4]
 
     def _init_variables(self, initial_position: typing.BBOX_CENTER, **kwargs):

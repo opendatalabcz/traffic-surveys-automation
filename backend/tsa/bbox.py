@@ -59,7 +59,7 @@ class BBox:
         return self.bbox * self.size
 
     def to_numpy_center(self):
-        """Returns scaled numpy array of (centerX, centerY, area, aspect ratio)."""
+        """Returns scaled numpy array of (centerX, centerY, aspect ratio, height)."""
         return bbox_to_center(self.scaled_bbox.numpy())
 
     def to_rectangle(self):

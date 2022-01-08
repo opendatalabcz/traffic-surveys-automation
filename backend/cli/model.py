@@ -61,7 +61,7 @@ def run_model(
         config.ED_NSM_SIGMA,
         config.ED_BATCH_SIZE,
     )
-    tracking_model = SORT(config.SORT_MIN_HITS, config.SORT_MAX_AGE, config.SORT_IOU_THRESHOLD)
+    tracking_model = SORT(config.SORT_MIN_UPDATES, config.SORT_MAX_AGE, config.SORT_IOU_THRESHOLD)
 
     save_as_video(prediction_model, tracking_model, dataset, output_path, output_frame_rate, (1280, 720))
 
