@@ -2,11 +2,11 @@ import numpy as np
 from numpy.testing import assert_array_almost_equal
 
 from tsa.bbox import BBox
-from tsa.models.tracking.sort import SORT
+from tsa.models.tracking import SimpleSORT
 
 
 def test_sort():
-    sort = SORT(1, 3, 0.7)
+    sort = SimpleSORT(1, 3, 0.7)
     step_1 = [BBox.from_numpy_center(np.array([120, 70, 2, 100]))]
     tracking, _, _ = sort.track(step_1)
     assert not tracking

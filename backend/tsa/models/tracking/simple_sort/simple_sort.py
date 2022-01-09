@@ -5,102 +5,20 @@ DOI: 10.1109/ICIP.2016.7533003.
 GitHub repository: https://github.com/abewley/sort/tree/bce9f0d1fc8fb5f45bf7084130248561a3d42f31.
 """
 from typing import List, Optional, Tuple
-from uuid import uuid4
 
 import numpy as np
-from scipy.optimize import linear_sum_assignment
 
 from tsa import bbox, typing
-from tsa.cv2.kalman_filter import KalmanFilter
 from tsa.models import TrackableModel
-from tsa.np_utils import iou_batch
+
+from .association import associate_detections_to_trackers
+from .tracker import Tracker
 
 MATCHED_BBOXES = List[Optional[typing.NP_ARRAY]]
 MATCHED_IDS = List[Optional[str]]
 
 
-def associate_detections_to_trackers(detections, trackers, iou_threshold: float):
-    """Assigns detections to tracked object, both represented as bounding boxes.
-
-    Returns 3 lists of matches, unmatched_detections and unmatched_trackers.
-    Adopted from https://github.com/abewley/sort/blob/bce9f0d1fc8fb5f45bf7084130248561a3d42f31/sort.py#L154.
-    """
-    if len(trackers) == 0:
-        return np.empty((0, 2), dtype=int), np.arange(len(detections)), np.empty((0, 5), dtype=int)
-
-    if len(detections) == 0:
-        return np.empty((0, 2), dtype=int), np.empty((0, 5), dtype=int), np.arange(len(trackers))
-
-    iou_matrix = iou_batch(detections, trackers)
-
-    if min(iou_matrix.shape) > 0:
-        a = (iou_matrix > iou_threshold).astype(np.int32)
-        if a.sum(1).max() == 1 and a.sum(0).max() == 1:
-            matched_indices = np.stack(np.where(a), axis=1)
-        else:
-            row_indices, col_indices = linear_sum_assignment(-iou_matrix)
-            matched_indices = np.array(list(zip(row_indices, col_indices)))
-    else:
-        matched_indices = np.empty(shape=(0, 2))
-
-    unmatched_detections = [d for d, det in enumerate(detections) if d not in matched_indices[:, 0]]
-
-    unmatched_trackers = [t for t, trk in enumerate(trackers) if t not in matched_indices[:, 1]]
-
-    # filter out matched with low IOU, move them to unmatched detections and trackers
-    matches = []
-    for m in matched_indices:
-        if iou_matrix[m[0], m[1]] < iou_threshold:
-            unmatched_detections.append(m[0])
-            unmatched_trackers.append(m[1])
-        else:
-            matches.append(m.reshape(1, 2))
-
-    if len(matches) == 0:
-        matches = np.empty((0, 2), dtype=int)
-    else:
-        matches = np.concatenate(matches, axis=0)
-
-    return matches, np.array(unmatched_detections), np.array(unmatched_trackers)
-
-
-class Tracker:
-    def __init__(self, initial_position: typing.BBOX_COORDINATES, min_updates: int, max_age: int):
-        self.id, self.updates, self.predictions, self.time_since_update = uuid4(), 0, 0, 0
-        self.min_updates, self.max_time_since_update = min_updates, max_age
-        self.kalman_filter = KalmanFilter(bbox.bbox_to_center(initial_position))
-
-    @property
-    def state(self) -> typing.BBOX_COORDINATES:
-        bbox_prediction, _ = bbox.center_to_bbox(self.kalman_filter.state)
-        return bbox_prediction
-
-    @property
-    def is_active(self) -> bool:
-        return self.updates >= self.min_updates
-
-    @property
-    def is_deleted(self) -> bool:
-        return (
-            self.time_since_update > self.max_time_since_update or
-            (not self.is_active and self.updates != self.predictions)
-        )
-
-    def update(self, new_position: typing.BBOX_COORDINATES):
-        self.updates += 1
-        self.time_since_update = 0
-
-        self.kalman_filter.update(bbox.bbox_to_center(new_position))
-
-    def predict(self) -> typing.BBOX_COORDINATES:
-        self.predictions += 1
-
-        prediction = self.kalman_filter.predict()
-        bbox_prediction, _ = bbox.center_to_bbox(prediction)
-        return bbox_prediction
-
-
-class SORT(TrackableModel):
+class SimpleSORT(TrackableModel):
     def __init__(self, min_updates: int, max_age: int, iou_threshold: float):
         # init configurable algorithm variables
         self.iou_threshold = iou_threshold

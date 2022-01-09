@@ -5,7 +5,7 @@ import click
 from tsa.config import config
 from tsa.datasets import VideoFramesDataset
 from tsa.models.detection import EfficientDetD6
-from tsa.models.tracking import SORT
+from tsa.models.tracking import SimpleSORT
 from tsa.exporter import save_as_video
 
 
@@ -61,7 +61,7 @@ def run_model(
         config.ED_NSM_SIGMA,
         config.ED_BATCH_SIZE,
     )
-    tracking_model = SORT(config.SORT_MIN_UPDATES, config.SORT_MAX_AGE, config.SORT_IOU_THRESHOLD)
+    tracking_model = SimpleSORT(config.SORT_MIN_UPDATES, config.SORT_MAX_AGE, config.SORT_IOU_THRESHOLD)
 
     save_as_video(prediction_model, tracking_model, dataset, output_path, output_frame_rate, (1280, 720))
 
