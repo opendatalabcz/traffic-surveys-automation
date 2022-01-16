@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from konfetti import env
 
-MODELS_PATH = env("MODELS_PATH")
+MODELS_PATH = env("MODELS_PATH", cast=Path)

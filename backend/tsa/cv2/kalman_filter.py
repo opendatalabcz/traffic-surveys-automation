@@ -19,6 +19,7 @@ class KalmanFilter:
     - measurement: 4 values: center_x, center_y, ratio, height
     - state: 10 values: center_x, center_y, ratio, height, *velocity_of_each_measurement, x_acceleration, y_acceleration
     """
+
     static_matrices: KalmanFilterStaticMatrices = None
 
     def __init__(self, initial_position: typing.BBOX_CENTER):
@@ -30,18 +31,22 @@ class KalmanFilter:
 
     @property
     def state(self) -> typing.BBOX_CENTER:
-        return self.kalman_filter.statePost[:4].reshape(-1,)
+        return self.kalman_filter.statePost[:4].reshape(
+            -1,
+        )
 
     @property
     def covariance(self):
-        return self.kalman_filter.errorCovPost
+        return self.kalman_filter.errorCovPost[:4, :4]
 
     def update(self, new_measurement: typing.BBOX_CENTER):
         self.kalman_filter.correct(new_measurement)
 
     def predict(self) -> typing.BBOX_CENTER:
         prediction = self.kalman_filter.predict()
-        prediction = prediction.reshape(-1,)
+        prediction = prediction.reshape(
+            -1,
+        )
         return prediction[:4]
 
     def _init_variables(self, initial_position: typing.BBOX_CENTER, **kwargs):
@@ -87,5 +92,5 @@ class KalmanFilter:
             np.eye(4, 10, dtype=np.float32),
             diagonal(position_measurement_var, size_measurement_var, repeats=(2, 2)),
             transition_matrix,
-            process_noise_covariance * acceleration_var
+            process_noise_covariance * acceleration_var,
         )

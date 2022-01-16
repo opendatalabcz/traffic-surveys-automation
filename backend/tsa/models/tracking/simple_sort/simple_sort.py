@@ -4,18 +4,16 @@ This follows the algorithm described in Bewley A. et al.: Simple Online and Real
 DOI: 10.1109/ICIP.2016.7533003.
 GitHub repository: https://github.com/abewley/sort/tree/bce9f0d1fc8fb5f45bf7084130248561a3d42f31.
 """
-from typing import List, Optional, Tuple
+from typing import List, Tuple
 
 import numpy as np
 
-from tsa import bbox, typing
+from tsa import bbox
 from tsa.models import TrackableModel
+from tsa.models.tracking.tracker import Tracker
+from tsa.typing import MATCHED_BBOXES, MATCHED_IDS, NP_ARRAY
 
 from .association import associate_detections_to_trackers
-from .tracker import Tracker
-
-MATCHED_BBOXES = List[Optional[typing.NP_ARRAY]]
-MATCHED_IDS = List[Optional[str]]
 
 
 class SimpleSORT(TrackableModel):
@@ -26,7 +24,7 @@ class SimpleSORT(TrackableModel):
         # prepare a list for storing active trackers
         self.active_trackers: List[Tracker] = []
 
-    def track(self, detections: List[bbox.BBox]) -> Tuple[typing.NP_ARRAY, MATCHED_IDS, int]:
+    def track(self, detections: List[bbox.BBox]) -> Tuple[NP_ARRAY, MATCHED_IDS, int]:
         # convert input detection bboxes to a numpy array
         numpy_detections = np.array([detection.to_rectangle() for detection in detections])
 
