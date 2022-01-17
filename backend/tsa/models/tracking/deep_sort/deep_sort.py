@@ -34,14 +34,15 @@ class DeepSORT(TrackableModel):
         self.embedder = MobileNetEmbedder()
 
     def set_frame(self, new_frame: NP_ARRAY):
-        self.embedding_frame = new_frame
+        self.embedding_frame = np.copy(new_frame)
 
     def track(self, detections: List[BBox]) -> Tuple[NP_ARRAY, MATCHED_IDS, int]:
         numpy_detections = np.array([detection.to_rectangle() for detection in detections])
 
-        embeddings = self._generate_embeddings(numpy_detections)
+        embeddings, embeddings_masks = self._generate_embeddings(numpy_detections)
         detections_with_embeddings = [
-            Detection(detection, embedding) for detection, embedding in zip(numpy_detections, embeddings)
+            Detection(detection, embedding if not embedding_mask else None)
+            for detection, embedding, embedding_mask in zip(numpy_detections, embeddings, embeddings_masks)
         ]
 
         self.tracker.predict()
@@ -58,7 +59,10 @@ class DeepSORT(TrackableModel):
         assert self.embedding_frame is not None, "Embedding frame is missing in DeepSORT."
 
         frame_crops_by_bbox = self.crop_bb(self.embedding_frame, detected_bboxes)
-        return self.embedder.predict(frame_crops_by_bbox)
+        np_predictions = self.embedder.predict(frame_crops_by_bbox)
+        np_predictions = np.nan_to_num(np_predictions, copy=False, nan=0.0)
+        np_predictions_masks = np.isclose(np.sum(np_predictions, axis=1), 0.0, atol=1.0)
+        return np_predictions, np_predictions_masks
 
     def _match_existing_trackers(self, matches, detections) -> Tuple[MATCHED_BBOXES, MATCHED_IDS]:
         """Match states with proper detections at proper positions."""

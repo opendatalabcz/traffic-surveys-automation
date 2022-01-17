@@ -12,12 +12,12 @@ def _cosine_distance(a, b, data_is_normalized=False):
         An LxM matrix of L samples of dimensionality M.
     data_is_normalized : Optional[bool]
         If True, assumes rows in a and b are unit length vectors.
-        Otherwise, a and b are explicitly normalized to lenght 1.
+        Otherwise, a and b are explicitly normalized to length 1.
 
     Returns
     -------
     ndarray
-        Returns a matrix of size len(a), len(b) such that eleement (i, j)
+        Returns a matrix of size len(a), len(b) such that element (i, j)
         contains the squared distance between `a[i]` and `b[j]`.
 
     """
@@ -93,7 +93,7 @@ class NearestNeighborDistanceMetric(object):
         """
         for feature, target in zip(features, targets):
             self.samples.setdefault(target, []).append(feature)
-            self.samples[target] = self.samples[target][-self.budget :]
+            self.samples[target] = self.samples[target][-self.budget:]
         self.samples = {k: self.samples[k] for k in active_targets}
 
     def distance(self, features, targets):

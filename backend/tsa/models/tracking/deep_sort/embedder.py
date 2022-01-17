@@ -10,15 +10,16 @@ class MobileNetEmbedder(tf.keras.Model):
     def __init__(self):
         original_inputs = tf.keras.layers.Input([None, None, 3], dtype=tf.uint8, ragged=True)
 
-        inputs = original_inputs.to_tensor()
+        inputs, inputs_mask = original_inputs.to_tensor(), tf.sequence_mask(original_inputs.row_lengths())
         inputs = tf.cast(inputs, tf.float32)
         inputs = tf.keras.applications.mobilenet_v2.preprocess_input(inputs)
 
         mobilenet = tf.keras.applications.mobilenet_v2.MobileNetV2(
-            input_tensor=inputs, include_top=False, pooling="avg"
+            input_shape=(160, 160, 3), include_top=False, pooling="avg", weights="imagenet"
         )
+        mobilenet_output = mobilenet(inputs, mask=inputs_mask)
 
-        super().__init__(inputs=original_inputs, outputs=mobilenet.output)
+        super().__init__(inputs=original_inputs, outputs=mobilenet_output)
 
     def predict(self, data, *args, **kwargs):
         """Get feature embeddings for the input image data.
