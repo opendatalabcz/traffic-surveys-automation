@@ -54,7 +54,7 @@ class DeepSORT(TrackableModel):
         assert frame is not None, "Embedding frame is missing in DeepSORT."
 
         frame_crops_by_bbox = self.crop_bb(frame, detected_bboxes)
-        np_predictions = self.embedder.predict(frame_crops_by_bbox)
+        np_predictions = self.embedder.predict_on_batch(frame_crops_by_bbox)
         np_predictions = np.nan_to_num(np_predictions, copy=False, nan=0.0)
         return np_predictions
 

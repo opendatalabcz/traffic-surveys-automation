@@ -21,11 +21,11 @@ class MobileNetEmbedder(tf.keras.Model):
 
         super().__init__(inputs=original_inputs, outputs=mobilenet_output)
 
-    def predict(self, data, *args, **kwargs):
+    def predict_on_batch(self, data):
         """Get feature embeddings for the input image data.
 
         @param data: list of numpy arrays of (H x W x C)
         @return: features tf.Tensor with (batch_size x 1280)
         """
         tf_data = tf.ragged.stack(data)
-        return super().predict(tf_data, *args, **kwargs)
+        return super().predict_on_batch(tf_data)
