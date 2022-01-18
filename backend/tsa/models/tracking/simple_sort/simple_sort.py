@@ -24,7 +24,7 @@ class SimpleSORT(TrackableModel):
         # prepare a list for storing active trackers
         self.active_trackers: List[Tracker] = []
 
-    def track(self, detections: List[bbox.BBox]) -> Tuple[NP_ARRAY, MATCHED_IDS, int]:
+    def track(self, detections: List[bbox.BBox], **_) -> Tuple[NP_ARRAY, MATCHED_IDS, int]:
         # convert input detection bboxes to a numpy array
         numpy_detections = np.array([detection.to_rectangle() for detection in detections])
 

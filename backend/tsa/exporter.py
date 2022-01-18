@@ -24,8 +24,7 @@ def save_as_video(
     output = cv2.VideoWriter(video_name, cv2.VideoWriter_fourcc(*"mp4v"), float(video_frame_rate), video_resolution)
 
     for frame, bboxes, classes, scores in prediction_model.predict(dataset):
-        tracking_model.set_frame(frame)
-        detections, identifiers, new_boxes = tracking_model.track(bboxes)
+        detections, identifiers, new_boxes = tracking_model.track(bboxes, frame=frame)
         bboxes = bboxes + [None] * new_boxes
         classes = tf.concat((classes, tf.zeros_like((new_boxes,))), axis=0)
         scores = tf.concat((scores, tf.zeros_like((new_boxes,), dtype=tf.float32)), axis=0)

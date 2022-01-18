@@ -1,5 +1,3 @@
-from typing import Optional
-
 import numpy as np
 
 from tsa import bbox as bbox_functions
@@ -25,9 +23,9 @@ class Detection(object):
 
     """
 
-    def __init__(self, bbox, feature: Optional):
+    def __init__(self, bbox, feature):
         self.bbox = np.asarray(bbox, dtype=np.float32)
-        self.feature = np.asarray(feature, dtype=np.float32) if feature is not None else None
+        self.feature = np.asarray(feature, dtype=np.float32)
 
     def to_xyah(self):
         """Convert bounding box to format `(center x, center y, aspect ratio,

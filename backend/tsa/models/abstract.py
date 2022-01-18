@@ -20,8 +20,5 @@ class PredictableModel:
 
 class TrackableModel:
     @abstractmethod
-    def track(self, detections: List[BBox]):
-        pass
-
-    def set_frame(self, new_frame):
+    def track(self, detections: List[BBox], **kwargs):
         pass
