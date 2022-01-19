@@ -8,10 +8,9 @@ class MobileNetEmbedder(tf.keras.Model):
     """
 
     def __init__(self):
-        original_inputs = tf.keras.layers.Input([None, None, 3], dtype=tf.uint8, ragged=True)
+        original_inputs = tf.keras.layers.Input([None, None, 3], dtype=tf.float32, ragged=True)
 
         inputs, inputs_mask = original_inputs.to_tensor(), tf.sequence_mask(original_inputs.row_lengths())
-        inputs = tf.cast(inputs, tf.float32)
         inputs = tf.keras.applications.mobilenet_v2.preprocess_input(inputs)
 
         mobilenet = tf.keras.applications.mobilenet_v2.MobileNetV2(
@@ -25,7 +24,8 @@ class MobileNetEmbedder(tf.keras.Model):
         """Get feature embeddings for the input image data.
 
         @param data: list of numpy arrays of (H x W x C)
-        @return: features tf.Tensor with (batch_size x 1280)
+        @return: features Numpy array with (batch_size x 1280)
         """
         tf_data = tf.ragged.stack(data)
+        tf_data = tf.cast(tf_data, tf.float32)
         return super().predict_on_batch(tf_data)
