@@ -2,14 +2,14 @@ import numpy as np
 from numpy.testing import assert_array_almost_equal
 
 from tsa.bbox import BBox
-from tsa.models.tracking.sort import SORT
+from tsa.models.tracking import SimpleSORT
 
 
 def test_sort():
-    sort = SORT()
-    step_1 = [BBox.from_numpy_center(np.array([100.0, 50.0, 400.0, 1.0]))]
-    tracking, _ = sort.track(step_1)
-    assert_array_almost_equal(tracking[0], np.array([90.0, 40.0, 110.0, 60.0]))
-    step_2 = [BBox.from_numpy_center(np.array([105.0, 55.0, 400.0, 1.0]))]
-    tracking, _ = sort.track(step_2)
-    assert_array_almost_equal(tracking[0], np.array([94.58, 44.58, 114.58, 64.58]), decimal=2)
+    sort = SimpleSORT(1, 3, 0.7)
+    step_1 = [BBox.from_numpy_center(np.array([120, 70, 2, 100]))]
+    tracking, _, _ = sort.track(step_1)
+    assert not tracking
+    step_2 = [BBox.from_numpy_center(np.array([130, 70, 2, 100]))]
+    tracking, _, _ = sort.track(step_2)
+    assert_array_almost_equal(tracking[0], np.array([29.93, 20., 229.93, 120.]), decimal=2)

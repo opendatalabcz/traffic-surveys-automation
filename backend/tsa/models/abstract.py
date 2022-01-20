@@ -20,5 +20,5 @@ class PredictableModel:
 
 class TrackableModel:
     @abstractmethod
-    def track(self, detections):
+    def track(self, detections: List[BBox], **kwargs):
         pass

@@ -1,3 +1,4 @@
-from .sort import SORT
+from .deep_sort import DeepSORT
+from .simple_sort import SimpleSORT
 
-__all__ = ["SORT"]
+__all__ = ["DeepSORT", "SimpleSORT"]

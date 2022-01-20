@@ -1,26 +1,24 @@
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 import numpy as np
 import tensorflow as tf
 
-from tsa.typing import IMAGE_SHAPE
+from tsa import typing
 
 
-def center_to_bbox(center):
-    center_x, center_y, area, ratio = center
-    width = np.sqrt(area * ratio)
-    height = area / width
+def center_to_bbox(center: typing.BBOX_CENTER) -> Tuple[typing.BBOX_COORDINATES, typing.IMAGE_SHAPE]:
+    center_x, center_y, ratio, height = center
+    width = ratio * height
     x1, x2 = center_x - width / 2.0, center_x + width / 2.0
     y1, y2 = center_y - height / 2.0, center_y + height / 2.0
     return np.array([x1, y1, x2, y2], dtype=np.float32), (width, height)
 
 
-def bbox_to_center(bbox):
+def bbox_to_center(bbox: typing.BBOX_COORDINATES) -> typing.BBOX_CENTER:
     x1, y1, x2, y2 = bbox
     width, height = x2 - x1, y2 - y1
-    center_x, center_y = x1 + width / 2.0, y1 + height / 2.0
-    area, ratio = width * height, width / height
-    return np.array([center_x, center_y, area, ratio], dtype=np.float32)
+    center_x, center_y, ratio = x1 + width / 2.0, y1 + height / 2.0, width / height
+    return np.array([center_x, center_y, ratio, height], dtype=np.float32)
 
 
 class BBox:
@@ -30,11 +28,11 @@ class BBox:
     represented by top-left and bottom-right positions. Available methods allow to convert it to different formats.
     """
 
-    def __init__(self, bbox, size: Optional[IMAGE_SHAPE] = None):
+    def __init__(self, bbox, size: Optional[typing.IMAGE_SHAPE] = None):
         """Initialize a bounding box.
 
-        @param bbox array of size 4 with top-left and bottom-right coordinates of the bbox
-        @param size size of the image the bounding box belongs to, it is use for scaling the bbox up to the original
+        @param bbox: array of size 4 with top-left and bottom-right coordinates of the bbox
+        @param size: size of the image the bounding box belongs to, it is use for scaling the bbox up to the original
         size
         """
         # multiplication matrix for adjusting bbox to the provided size
@@ -61,7 +59,7 @@ class BBox:
         return self.bbox * self.size
 
     def to_numpy_center(self):
-        """Returns scaled numpy array of (centerX, centerY, area, aspect ratio)."""
+        """Returns scaled numpy array of (centerX, centerY, aspect ratio, height)."""
         return bbox_to_center(self.scaled_bbox.numpy())
 
     def to_rectangle(self):
