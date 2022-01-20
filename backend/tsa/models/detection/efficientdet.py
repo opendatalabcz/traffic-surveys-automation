@@ -4,10 +4,8 @@ from typing import Generator
 import tensorflow as tf
 import tensorflow_hub as tf_hub
 
-from tsa.bbox import BBox
 from tsa.config import config
 from tsa.datasets import FramesDataset
-from tsa.logging import log
 from tsa.models import PredictableModel
 
 
@@ -32,18 +30,21 @@ class EfficientDet(PredictableModel, ABC):
         self.tile_multiples = [1, 1, tf.shape(self.filtered_labels)[0]]
 
     def predict(self, dataset: FramesDataset) -> Generator:
+        """Run a prediction step on a single batch and yield results.
+
+        @return: generator of tuples:
+        (frames [BATCH, W, H, 3], bounding boxes [BATCH, None, 4], classes [BATCH, None], scores [BATCH, None])
+        """
         tf_dataset = dataset.as_tf_dataset(self.batch_size)
 
         for frames in tf_dataset:
             batch_bboxes, batch_classes, batch_scores = self._predict(frames)
-            for frame, bboxes, classes, scores in zip(frames, batch_bboxes, batch_classes, batch_scores):
-                yield frame.numpy(), BBox.from_tensor_list(bboxes, None, None), classes, scores
+            yield frames, batch_bboxes, batch_classes, batch_scores
 
     def _build_model(self):
         saved_model = tf_hub.load(f"{config.MODELS_PATH}/{self.model_path}")
         return saved_model.signatures["serving_default"]
 
-    @log()
     @tf.function()
     def _predict(self, frames):
         predictions = self.model(frames)
