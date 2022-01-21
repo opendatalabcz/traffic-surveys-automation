@@ -54,7 +54,6 @@ class DeepSORT(TrackableModel):
 
         return np.array(boxes, dtype=object), ids, new_boxes
 
-    @log()
     @tf.function
     def _generate_embeddings(self, frames, detections):
         crops = self.crop_bounding_boxes(frames, detections)

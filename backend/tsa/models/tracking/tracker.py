@@ -17,7 +17,8 @@ class TrackerState(Enum):
 class Tracker:
     def __init__(self, initial_position: typing.BBOX_COORDINATES, min_updates: int, max_age: int):
         self.id = uuid4()
-        self.updates, self.predictions, self.time_since_update, self._status = 0, 0, 0, TrackerState.new
+        self._status = TrackerState.new if min_updates > 0 else TrackerState.active
+        self.updates, self.predictions, self.time_since_update = 0, 0, 0
         self.min_updates, self.max_time_since_update = min_updates, max_age
         self.kalman_filter = KalmanFilter(bbox.bbox_to_center(initial_position))
 
