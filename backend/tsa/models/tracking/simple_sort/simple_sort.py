@@ -8,7 +8,6 @@ from typing import List, Tuple
 
 import numpy as np
 
-from tsa import bbox
 from tsa.models import TrackableModel
 from tsa.models.tracking.tracker import Tracker
 from tsa.typing import MATCHED_BBOXES, MATCHED_IDS, NP_ARRAY
@@ -24,18 +23,19 @@ class SimpleSORT(TrackableModel):
         # prepare a list for storing active trackers
         self.active_trackers: List[Tracker] = []
 
-    def track(self, detections: List[bbox.BBox], **_) -> Tuple[NP_ARRAY, MATCHED_IDS, int]:
-        # convert input detection bboxes to a numpy array
-        numpy_detections = np.array([detection.to_rectangle() for detection in detections])
+    def track(self, detections, **kwargs):
+        for single_detections in detections:
+            yield self._track_single_frame(single_detections)
 
+    def _track_single_frame(self, detections) -> Tuple[NP_ARRAY, MATCHED_IDS, int]:
         # get next bbox predictions from the existing trackers
         predictions = self._predict_active_trackers()
 
         # match predictions with detections
         matched, unmatched_detections, unmatched_trackers = associate_detections_to_trackers(
-            numpy_detections, predictions, iou_threshold=self.iou_threshold
+            detections, predictions, iou_threshold=self.iou_threshold
         )
-        boxes, ids = self._update_and_match_existing_trackers(matched, numpy_detections)
+        boxes, ids = self._update_and_match_existing_trackers(matched, detections)
         boxes, ids, new_boxes = self._add_unmatched_trackers(unmatched_trackers, boxes, ids)
 
         # delete old trackers
@@ -45,7 +45,7 @@ class SimpleSORT(TrackableModel):
 
         # create new trackers
         for i in unmatched_detections:
-            new_tracker = Tracker(numpy_detections[i], **self.tracker_config)
+            new_tracker = Tracker(detections[i], **self.tracker_config)
             self.active_trackers.append(new_tracker)
 
         return np.array(boxes, dtype=object), ids, new_boxes

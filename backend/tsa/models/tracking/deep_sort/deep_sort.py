@@ -6,18 +6,19 @@ Code in this module is inspired by
 https://github.com/levan92/deep_sort_realtime/tree/fb4cf8e32cca33a2dab127d4d6e265adfb190e88
 which creates a wrapper around the original Deep SORT but uses pytorch which is not suitable for us.
 """
-from typing import List, Tuple
+from typing import Tuple
 
 import numpy as np
+import tensorflow as tf
 
-from tsa.bbox import BBox
 from tsa.models import TrackableModel
+from tsa.logging import log
 from tsa.typing import MATCHED_BBOXES, MATCHED_IDS, NP_ARRAY, NP_FRAME
 
 from .deep_sort_raw import nn_matching
 from .deep_sort_raw.detection import Detection
 from .deep_sort_raw.tracker import Tracker
-from .embedder import MobileNetEmbedder
+from .embedder import mobilenet_embedder
 
 
 class DeepSORT(TrackableModel):
@@ -30,33 +31,39 @@ class DeepSORT(TrackableModel):
             max_age,
             min_updates,
         )
-        self.embedder = MobileNetEmbedder()
+        self.embedder = mobilenet_embedder()
 
-    def track(self, detections: List[BBox], **kwargs) -> Tuple[NP_ARRAY, MATCHED_IDS, int]:
-        numpy_detections = np.array([detection.to_rectangle() for detection in detections])
+    def track(self, detections, **kwargs):
+        embeddings = self._generate_embeddings(kwargs.pop("frames"), detections)
 
-        embeddings = self._generate_embeddings(kwargs.pop("frame"), numpy_detections)
+        for single_detections, single_embeddings in zip(detections, embeddings):
+            yield self._track_single_frame(single_detections, single_embeddings)
+
+    def _track_single_frame(self, detections, embeddings) -> Tuple[NP_ARRAY, MATCHED_IDS, int]:
         detections_with_embeddings = [
-            Detection(detection, embedding) for detection, embedding in zip(numpy_detections, embeddings)
+            Detection(detection, embedding) for detection, embedding in zip(detections, embeddings)
         ]
 
         self.tracker.predict()
         matched, unmatched_trackers, unmatched_detections = self.tracker.match(detections_with_embeddings)
 
-        boxes, ids = self._match_existing_trackers(matched, numpy_detections)
+        boxes, ids = self._match_existing_trackers(matched, detections)
         boxes, ids, new_boxes = self._add_unmatched_trackers(unmatched_trackers, boxes, ids)
 
         self.tracker.update(matched, unmatched_trackers, unmatched_detections, detections_with_embeddings)
 
         return np.array(boxes, dtype=object), ids, new_boxes
 
-    def _generate_embeddings(self, frame: NP_FRAME, detected_bboxes):
-        assert frame is not None, "Embedding frame is missing in DeepSORT."
+    @tf.function
+    def _generate_embeddings(self, frames, detections):
+        crops = self.crop_bounding_boxes(frames, detections)
+        crops = tf.cast(crops, tf.float32)
+        merged_crops, batch_row_lengths = crops.merge_dims(0, 1), crops.row_lengths(axis=1)
 
-        frame_crops_by_bbox = self.crop_bb(frame, detected_bboxes)
-        np_predictions = self.embedder.predict_on_batch(frame_crops_by_bbox)
-        np_predictions = np.nan_to_num(np_predictions, copy=False, nan=0.0)
-        return np_predictions
+        embeddings = self.embedder(merged_crops)
+        embeddings = tf.RaggedTensor.from_row_lengths(embeddings, batch_row_lengths)
+        embeddings = tf.where(tf.math.is_nan(embeddings), tf.zeros_like(embeddings), embeddings)
+        return embeddings
 
     def _match_existing_trackers(self, matches, detections) -> Tuple[MATCHED_BBOXES, MATCHED_IDS]:
         """Match states with proper detections at proper positions."""
@@ -86,14 +93,29 @@ class DeepSORT(TrackableModel):
         return boxes, ids, new_number_of_boxes
 
     @staticmethod
-    def crop_bb(frame, raw_detections):
-        crops = []
-        im_height, im_width = frame.shape[:2]
-        for detection in raw_detections:
-            l, t, r, b = detection.astype(np.int32)
-            crop_l = max(0, l)
-            crop_r = min(im_width, r)
-            crop_t = max(0, t)
-            crop_b = min(im_height, b)
-            crops.append(frame[crop_t:crop_b, crop_l:crop_r])
-        return crops
+    def crop_bounding_boxes(frames, raw_detections) -> tf.RaggedTensor:
+        def frame_to_boxes(input_data):
+            frame, frame_detections = input_data
+            return tf.map_fn(
+                lambda bbox: tf.RaggedTensor.from_tensor(frame[bbox[1] : bbox[3], bbox[0] : bbox[2]]),
+                frame_detections,
+                infer_shape=False,
+                fn_output_signature=tf.RaggedTensorSpec((None, None, 3), dtype=tf.uint8, ragged_rank=1),
+            )
+
+        detections = tf.cast(raw_detections, tf.int32)
+        detections = tf.stack(
+            (
+                tf.math.maximum(0, detections[:, :, 0]),
+                tf.math.maximum(0, detections[:, :, 1]),
+                tf.math.minimum(tf.shape(frames)[2], detections[:, :, 2]),
+                tf.math.minimum(tf.shape(frames)[1], detections[:, :, 3]),
+            ),
+            axis=2,
+        )
+
+        return tf.map_fn(
+            frame_to_boxes,
+            (frames, detections),
+            fn_output_signature=tf.RaggedTensorSpec((None, None, None, 3), dtype=tf.uint8, ragged_rank=2),
+        )
