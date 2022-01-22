@@ -7,6 +7,10 @@ def diagonal(*values, repeats=None, dtype=np.float32):
     return np.diag(np.repeat(values, repeats)).astype(dtype)
 
 
+def generate_color():
+    return tuple(np.random.random(size=3) * 256)
+
+
 def iou_batch(bb_test, bb_gt):
     """Compute an intersection over union on a batch of bounding boxes.
 
