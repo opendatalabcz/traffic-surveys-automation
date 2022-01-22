@@ -1,6 +1,5 @@
 import tensorflow as tf
 
-from tsa import tf_utils
 from tsa.datasets import FramesDataset
 from tsa.models.abstract import PredictableModel, TrackableModel
 
@@ -23,6 +22,6 @@ def run_detection_and_tracking(
             padded_classes = tf.pad(classes, padding_shape, constant_values=0)
             padded_scores = tf.pad(scores, padding_shape, constant_values=0.0)
             # merge detections and tracks in a way that detected bounding boxes are considered to be a ground truth
-            merged_detections = tf_utils.conditional_concat(detections, tracks[detections.shape[0] :], 0)
+            merged_detections = tf.concat((detections, tracks[detections.shape[0] :]), axis=0)
 
             yield frame.numpy(), merged_detections, identifiers, padded_classes, padded_scores

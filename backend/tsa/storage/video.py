@@ -20,24 +20,11 @@ class VideoStorageMethod(StorageMethod):
                 color = self.id_color_mapping.get(identifier, np_utils.generate_color())
                 self.id_color_mapping[identifier] = color
 
-            cv2.rectangle(
-                frame,
-                (np_detection[0], np_detection[1]),
-                (np_detection[2], np_detection[3]),
-                color,
-                2,
-                1,
-            )
+            cv2.rectangle(frame, (np_detection[0], np_detection[1]), (np_detection[2], np_detection[3]), color, 2, 1)
 
             if class_ is not None:
-                cv2.putText(
-                    frame,
-                    f"{class_}: {score}",
-                    (np_detection[0], np_detection[1]),
-                    cv2.FONT_HERSHEY_PLAIN,
-                    1,
-                    color,
-                )
+                text = f"{class_}: {score}"
+                cv2.putText(frame, text, (np_detection[0], np_detection[1]), cv2.FONT_HERSHEY_PLAIN, 1, color)
 
         self.output_video.write(frame)
 

@@ -10,11 +10,6 @@ from tsa.models.tracking import DeepSORT
 from tsa.storage import VideoStorageMethod
 
 
-@click.group()
-def cli():
-    pass
-
-
 @click.command(help="Run the model.")
 @click.option(
     "-d", "dataset_path", type=click.Path(exists=True, readable=True), required=True, help="Path to a video dataset."
@@ -44,7 +39,7 @@ def cli():
     required=False,
     help="Override the default configuration defined in tsa.config.*.config.json files.",
 )
-def run_model(
+def export_to_video(
     dataset_path: str,
     output_path: str,
     output_frame_rate: Optional[int] = None,
@@ -70,15 +65,10 @@ def run_model(
         config.DEEP_SORT_MAX_MEMORY_SIZE,
     )
 
-    video_storage = VideoStorageMethod(output_path, float(output_frame_rate), (1280, 720))
-
     tracking_generator = processes.run_detection_and_tracking(dataset, prediction_model, tracking_model)
 
-    processes.store_tracks(tracking_generator, video_storage)
-
-
-cli.add_command(run_model)
+    processes.store_tracks(tracking_generator, VideoStorageMethod(output_path, float(output_frame_rate), (1280, 720)))
 
 
 if __name__ == "__main__":
-    cli()
+    export_to_video()

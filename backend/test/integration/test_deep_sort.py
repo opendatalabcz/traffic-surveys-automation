@@ -24,7 +24,7 @@ def test_deep_sort():
             ]
         )
     )
-    assert all(box is None for box in boxes)
+    assert all(not box.all() for box in boxes)
 
     boxes = track(
         tf.constant(
