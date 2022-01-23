@@ -3,10 +3,10 @@ import numpy as np
 
 from tsa import np_utils, typing
 
-from .abstract import StorageMethod
+from .abstract import WriteStorageMethod
 
 
-class VideoStorageMethod(StorageMethod):
+class VideoStorageMethod(WriteStorageMethod):
     def __init__(self, path: str, frame_rate: float, resolution: typing.IMAGE_SHAPE):
         self.output_video = cv2.VideoWriter(path, cv2.VideoWriter_fourcc(*"mp4v"), frame_rate, resolution)
         self.id_color_mapping = {}
