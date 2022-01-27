@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Optional
 
 import numpy as np
 from scipy.interpolate import make_lsq_spline
@@ -7,34 +8,27 @@ from tsa import typing
 
 
 @dataclass
-class FittingCurve:
-    def __init__(self, fitting_points: typing.NP_ARRAY, degree: int):
-        unique_x_data = np.arange(0, fitting_points.shape[0])
+class SmoothingCurve:
+    def __init__(self, fitting_points: typing.NP_ARRAY):
+        self.count = fitting_points.shape[0]
 
-        self._x_start_point, self._x_end_point = np.min(unique_x_data), np.max(unique_x_data)
+        time = np.arange(0, self.count)
         self._interpolation_fn = make_lsq_spline(
-            unique_x_data,
+            time,
             fitting_points,
-            np.array(
-                [
-                    unique_x_data[0],
-                    unique_x_data[0],
-                    unique_x_data[0],
-                    *unique_x_data[2:-2:10],
-                    unique_x_data[-1],
-                    unique_x_data[-1],
-                    unique_x_data[-1],
-                ]
-            ),
+            np.array([time[0] - 2, time[0] - 1, time[0], *time[1:-1:11], time[-1], time[-1] + 1, time[-1] + 2]),
             k=2,
-            check_finite=False,
         )
 
-    # interp1d(unique_x_data, y_data[unique_x_data_index], kind="linear", fill_value="extrapolate", assume_sorted=False)
+        self.start_point = self._interpolation_fn(0)
+        self.end_point = self._interpolation_fn(self.count)
 
     def __call__(self, *args, **kwargs):
         return self._interpolation_fn(*args, **kwargs)
 
     @property
-    def x_lin_space(self):
-        return np.linspace(self._x_start_point, self._x_end_point, 100, dtype=np.int32)
+    def length(self) -> float:
+        return np.linalg.norm(self.end_point - self.start_point)
+
+    def points(self, length: int, start: int = 0, end: Optional[int] = None):
+        return np.array([self._interpolation_fn(t) for t in np.linspace(start, end or self.count, length)])

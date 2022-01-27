@@ -2,7 +2,6 @@ from pathlib import Path
 
 import click
 import cv2
-import numpy as np
 
 from tsa import processes
 from tsa.datasets import VideoFramesDataset
@@ -22,11 +21,11 @@ from tsa.storage import FileStorageMethod
 )
 def export_to_file(dataset_path: str, tracks_file: Path):
     dataset = VideoFramesDataset(dataset_path)
-    original_frame = next(dataset.frames)
+    frame = next(dataset.frames)
 
     file_storage = FileStorageMethod(tracks_file)
 
-    visualization_frame = processes.create_tracks_visualization(np.copy(original_frame), file_storage, False)
+    visualization_frame = processes.create_tracks_visualization(frame, file_storage, 150.0, 9, False)
 
     cv2.imshow("Cross-road visualization", visualization_frame)
     cv2.waitKey(0)

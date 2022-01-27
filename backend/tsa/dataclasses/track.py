@@ -5,9 +5,8 @@ from uuid import UUID
 import numpy as np
 
 from tsa import bbox
-from tsa.config import config
 
-from .curve import FittingCurve
+from .curve import SmoothingCurve
 
 
 @dataclass
@@ -16,7 +15,7 @@ class Track:
 
     _path: List
     _score_sum: float
-    _polynomial_line: Optional[FittingCurve] = None
+    _smoothing_line: Optional[SmoothingCurve] = None
 
     @property
     def count(self) -> int:
@@ -32,11 +31,15 @@ class Track:
         return np.asarray(self._path)
 
     @property
-    def interpolation(self) -> FittingCurve:
-        if self._polynomial_line is None:
-            self._polynomial_line = FittingCurve(self.path, config.INTERPOLATION_POLYNOMIAL_DEGREE)
+    def smooth_path(self) -> SmoothingCurve:
+        if self._smoothing_line is None:
+            self._smoothing_line = SmoothingCurve(self.path)
 
-        return self._polynomial_line
+        return self._smoothing_line
+
+    @property
+    def smooth_path_length(self) -> float:
+        return self.smooth_path.length
 
     def __init__(self, identifier: Union[str, UUID]):
         self._path = []
