@@ -18,6 +18,7 @@ from .deep_sort_raw import nn_matching
 from .deep_sort_raw.detection import Detection
 from .deep_sort_raw.tracker import Tracker
 from .embedder import mobilenet_embedder
+from .preprocessor import frame_detections_to_crops
 
 
 class DeepSORT(CommonSORT):
@@ -67,15 +68,6 @@ class DeepSORT(CommonSORT):
 
     @staticmethod
     def crop_bounding_boxes(frames, raw_detections) -> tf.RaggedTensor:
-        def frame_to_boxes(input_data):
-            frame, frame_detections = input_data
-            return tf.map_fn(
-                lambda bbox: tf.RaggedTensor.from_tensor(frame[bbox[1] : bbox[3], bbox[0] : bbox[2]]),
-                frame_detections,
-                infer_shape=False,
-                fn_output_signature=tf.RaggedTensorSpec((None, None, 3), dtype=tf.uint8, ragged_rank=1),
-            )
-
         detections = tf.cast(raw_detections, tf.int32)
         detections = tf.stack(
             (
@@ -87,8 +79,4 @@ class DeepSORT(CommonSORT):
             axis=2,
         )
 
-        return tf.map_fn(
-            frame_to_boxes,
-            (frames, detections),
-            fn_output_signature=tf.RaggedTensorSpec((None, None, None, 3), dtype=tf.uint8, ragged_rank=2),
-        )
+        return frame_detections_to_crops(frames, detections)
