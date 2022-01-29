@@ -17,7 +17,7 @@ from tsa.typing import MATCHED_IDS, NP_ARRAY
 from .deep_sort_raw import nn_matching
 from .deep_sort_raw.detection import Detection
 from .deep_sort_raw.tracker import Tracker
-from .embedder import mobilenet_embedder
+from .embedder import embedding_model
 from .preprocessor import frame_detections_to_crops
 
 
@@ -32,7 +32,7 @@ class DeepSORT(CommonSORT):
             min_updates,
         )
         self.current_trackers = self.tracker.tracks  # copies reference to the same list of tracks
-        self.embedder = mobilenet_embedder()
+        self.embedder = embedding_model()
 
     def track(self, detections, **kwargs):
         embeddings = self._generate_embeddings(kwargs.pop("frames"), detections)

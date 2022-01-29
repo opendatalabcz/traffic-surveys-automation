@@ -8,7 +8,7 @@ def _frame_to_boxes(input_data):
 
     return tf.map_fn(
         lambda bbox: tf.RaggedTensor.from_tensor(
-            optional_resize_with_pad(frame[bbox[1]: bbox[3], bbox[0]: bbox[2]], 32, 32)
+            optional_resize_with_pad(frame[bbox[1] : bbox[3], bbox[0] : bbox[2]], 32, 32)
         ),
         frame_detections,
         infer_shape=False,
