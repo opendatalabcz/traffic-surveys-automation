@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Generator
 
-from tsa.dataclasses.track import Track
+from tsa.dataclasses.track import FinalTrack
 
 
 class WriteStorageMethod(ABC):
@@ -16,5 +16,5 @@ class WriteStorageMethod(ABC):
 
 class ReadStorageMethod(ABC):
     @abstractmethod
-    def read_track(self) -> Generator[Track, None, None]:
+    def read_track(self) -> Generator[FinalTrack, None, None]:
         ...

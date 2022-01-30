@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Generator
 
 import simplejson
-from tsa.dataclasses.track import Track
+from tsa.dataclasses.track import FinalTrack, Track
 
 from .abstract import ReadStorageMethod, WriteStorageMethod
 
@@ -26,9 +26,9 @@ class FileStorageMethod(ReadStorageMethod, WriteStorageMethod):
         with open(self.output_file_path, "w", encoding="utf-8") as output_file:
             simplejson.dump([track.as_dict() for track in self.tracks.values()], output_file)
 
-    def read_track(self) -> Generator[Track, None, None]:
+    def read_track(self) -> Generator[FinalTrack, None, None]:
         with open(self.output_file_path, "r", encoding="utf-8") as input_file:
             all_tracks = simplejson.load(input_file)
 
         for track in all_tracks:
-            yield Track.from_dict(track)
+            yield FinalTrack(track)
