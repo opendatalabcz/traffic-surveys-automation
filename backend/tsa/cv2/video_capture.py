@@ -11,8 +11,8 @@ class VideoCapture:
         self._video = cv2.VideoCapture(file_path)
 
     @property
-    def frame_rate(self) -> float:
-        return self._video.get(cv2.CAP_PROP_FPS)
+    def frame_rate(self) -> int:
+        return int(self._video.get(cv2.CAP_PROP_FPS))
 
     @property
     def resolution(self) -> Tuple[int, int]:

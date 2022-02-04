@@ -49,7 +49,9 @@ def export_to_video(
     if config_file is not None:
         config.extend_with_json(config_file)
 
-    dataset = VideoFramesDataset(dataset_path, output_frame_rate, max_frames)
+    video_dataset = VideoFramesDataset(dataset_path, output_frame_rate, max_frames)
+    video_statistics = video_dataset.video_statistics
+
     prediction_model = EfficientDetD6(
         config.ED_MAX_OUTPUTS,
         config.ED_IOU_THRESHOLD,
@@ -65,9 +67,12 @@ def export_to_video(
         config.DEEP_SORT_MAX_MEMORY_SIZE,
     )
 
-    tracking_generator = processes.run_detection_and_tracking(dataset, prediction_model, tracking_model)
+    tracking_generator = processes.run_detection_and_tracking(video_dataset, prediction_model, tracking_model)
 
-    processes.store_tracks(tracking_generator, VideoStorageMethod(output_path, float(output_frame_rate), (1280, 720)))
+    processes.store_tracks(
+        tracking_generator,
+        VideoStorageMethod(output_path, float(video_statistics.frame_rate), video_statistics.resolution),
+    )
 
 
 if __name__ == "__main__":

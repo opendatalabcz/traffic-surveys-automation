@@ -39,6 +39,8 @@ class SimpleSORT(CommonSORT):
         matched_boxes, matched_ids = self._matched_trackers(matched, detections)
         unmatched_boxes, unmatched_ids, new_boxes = self._unmatched_trackers(unmatched_trackers)
 
+        self._update_existing_trackers(matched, detections)
+
         self._delete_old_trackers()
 
         self._create_new_trackers(unmatched_detections, detections)
