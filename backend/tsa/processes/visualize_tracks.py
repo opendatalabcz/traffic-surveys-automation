@@ -28,6 +28,6 @@ def create_tracks_visualization(
             for point in track.path.astype(np.int32):
                 cv2.circle(frame, point, 1, colors[cluster], 2)
 
-        cv2.polylines(frame, [track.curve.coordinates.astype(np.int32)], False, colors[cluster], 2)
+        cv2.polylines(frame, [track.curve.coordinates.astype(np.int32)], False, colors[cluster], 1)
 
     return frame

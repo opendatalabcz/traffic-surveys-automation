@@ -1,11 +1,16 @@
 from pathlib import Path
+from typing import Optional
 
 import click
 import cv2
 
 from tsa import processes
+from tsa.config import config
+from tsa.cv2.line_draw import LineDrawer
 from tsa.datasets import VideoFramesDataset
 from tsa.storage import FileStorageMethod
+
+WINDOW_NAME = "Tracks visualization"
 
 
 @click.command(help="Display tracks visualization.")
@@ -13,24 +18,38 @@ from tsa.storage import FileStorageMethod
     "-d", "dataset_path", type=click.Path(exists=True, readable=True), required=True, help="Path to a video dataset."
 )
 @click.option(
-    "-f",
-    "tracks_file",
-    type=click.Path(writable=True),
-    required=True,
-    help="Path where to store the output file.",
+    "-f", "tracks_file", type=click.Path(exists=True, readable=True), required=True, help="Path with vehicle tracks."
 )
-def export_to_file(dataset_path: str, tracks_file: Path):
+@click.option(
+    "--config-file",
+    type=click.Path(exists=True),
+    required=False,
+    help="Override the default configuration defined in tsa.config.*.config.json files.",
+)
+def visualize_tracks(dataset_path: str, tracks_file: Path, config_file: Optional[str] = None):
+    if config_file is not None:
+        config.extend_with_json(config_file)
+
     dataset = VideoFramesDataset(dataset_path)
     frame = next(dataset.frames)
 
     file_storage = FileStorageMethod(tracks_file)
 
-    visualization_frame = processes.create_tracks_visualization(frame, file_storage, 150.0, 9, False)
+    visualization_frame = processes.create_tracks_visualization(
+        frame, file_storage, config.VISUALIZATION_MIN_PATH_LENGTH, config.VISUALIZATION_N_CLUSTERS, False
+    )
 
-    cv2.imshow("Cross-road visualization", visualization_frame)
+    lines_drawer = LineDrawer(frame, WINDOW_NAME)
+
+    cv2.imshow(WINDOW_NAME, visualization_frame)
+    cv2.setMouseCallback(WINDOW_NAME, lines_drawer)
+
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
+    for x1, y1, x2, y2 in lines_drawer.lines:
+        print(f"{x1} {y1} {x2} {y2}")
+
 
 if __name__ == "__main__":
-    export_to_file()
+    visualize_tracks()
