@@ -45,5 +45,8 @@ def associate_detections_to_trackers(detections, trackers, iou_threshold: float)
         matches = np.empty((0, 2), dtype=int)
     else:
         matches = np.concatenate(matches, axis=0)
+        # switch positions of detections and trackers indices
+        # this is to match how the columns are used in both Simple and DeepSORT
+        matches = np.flip(matches, axis=1)
 
     return matches, np.array(unmatched_detections), np.array(unmatched_trackers)

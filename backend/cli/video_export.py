@@ -2,16 +2,12 @@ from typing import Optional
 
 import click
 
+from tsa import processes
 from tsa.config import config
 from tsa.datasets import VideoFramesDataset
 from tsa.models.detection import EfficientDetD6
 from tsa.models.tracking import DeepSORT
-from tsa.exporter import save_as_video
-
-
-@click.group()
-def cli():
-    pass
+from tsa.storage import VideoStorageMethod
 
 
 @click.command(help="Run the model.")
@@ -43,7 +39,7 @@ def cli():
     required=False,
     help="Override the default configuration defined in tsa.config.*.config.json files.",
 )
-def run_model(
+def export_to_video(
     dataset_path: str,
     output_path: str,
     output_frame_rate: Optional[int] = None,
@@ -69,11 +65,10 @@ def run_model(
         config.DEEP_SORT_MAX_MEMORY_SIZE,
     )
 
-    save_as_video(prediction_model, tracking_model, dataset, output_path, output_frame_rate, (1280, 720))
+    tracking_generator = processes.run_detection_and_tracking(dataset, prediction_model, tracking_model)
 
-
-cli.add_command(run_model)
+    processes.store_tracks(tracking_generator, VideoStorageMethod(output_path, float(output_frame_rate), (1280, 720)))
 
 
 if __name__ == "__main__":
-    cli()
+    export_to_video()
