@@ -10,6 +10,7 @@ class VideoStorageMethod(WriteStorageMethod):
     def __init__(self, path: str, frame_rate: float, resolution: typing.IMAGE_SHAPE):
         self.output_video = cv2.VideoWriter(path, cv2.VideoWriter_fourcc(*"mp4v"), frame_rate, resolution)
         self.id_color_mapping = {}
+        self.color_generator = np_utils.RandomGenerator(path)
 
     def save_frame(self, frame, detections, identifiers, classes, scores):
         for detection, identifier, class_, score in zip(detections, identifiers, classes, scores):
@@ -17,7 +18,7 @@ class VideoStorageMethod(WriteStorageMethod):
             np_detection = detection.numpy().astype(np.int32)
 
             if identifier is not None:
-                color = self.id_color_mapping.get(identifier, np_utils.generate_color())
+                color = self.id_color_mapping.get(identifier, self.color_generator.colors(1)[0])
                 self.id_color_mapping[identifier] = color
 
             cv2.rectangle(frame, (np_detection[0], np_detection[1]), (np_detection[2], np_detection[3]), color, 2, 1)

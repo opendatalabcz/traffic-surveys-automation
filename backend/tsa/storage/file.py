@@ -26,6 +26,10 @@ class FileStorageMethod(ReadStorageMethod, WriteStorageMethod):
         with open(self.output_file_path, "w", encoding="utf-8") as output_file:
             simplejson.dump([track.as_dict() for track in self.tracks.values()], output_file)
 
+    @property
+    def track_name(self) -> str:
+        return str(self.output_file_path)
+
     def read_track(self) -> Generator[FinalTrack, None, None]:
         with open(self.output_file_path, "r", encoding="utf-8") as input_file:
             all_tracks = simplejson.load(input_file)
