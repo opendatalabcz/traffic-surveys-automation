@@ -15,6 +15,11 @@ class WriteStorageMethod(ABC):
 
 
 class ReadStorageMethod(ABC):
+    @property
+    @abstractmethod
+    def track_name(self) -> str:
+        ...
+
     @abstractmethod
     def read_track(self) -> Generator[FinalTrack, None, None]:
         ...

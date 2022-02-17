@@ -1,3 +1,6 @@
+import hashlib
+from typing import Union
+
 import numpy as np
 
 
@@ -5,10 +8,6 @@ def diagonal(*values, repeats=None, dtype=np.float32):
     if repeats is None:
         return np.diag(values).astype(dtype)
     return np.diag(np.repeat(values, repeats)).astype(dtype)
-
-
-def generate_color():
-    return tuple(np.random.random(size=3) * 256)
 
 
 def iou_batch(bb_test, bb_gt):
@@ -32,3 +31,14 @@ def iou_batch(bb_test, bb_gt):
         - wh
     )
     return o
+
+
+class RandomGenerator:
+    def __init__(self, seed: Union[int, str]):
+        if isinstance(seed, str):
+            seed = int(hashlib.sha1(seed.encode("utf-8")).hexdigest(), 16)
+
+        self._random_generator = np.random.default_rng(seed=seed)
+
+    def colors(self, count: int = 1):
+        return self._random_generator.integers(0, 256, size=(count, 3)).tolist()
