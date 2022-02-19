@@ -1,9 +1,9 @@
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 from sqlalchemy.dialects.postgresql import UUID
-from sqlmodel import ARRAY, Column, Field, Enum, JSON, Relationship, SQLModel, TEXT
+from sqlmodel import ARRAY, Column, Field, Enum, JSON, SQLModel, TEXT
 
-from tsa.app import enums
+from tsa import enums
 
 
 class SourceFile(SQLModel, table=True):
@@ -27,8 +27,6 @@ class SourceFile(SQLModel, table=True):
         sa_column=Column(Enum(enums.SourceFileStatus, name="source_file_status"), server_default="new", nullable=False),
         description="Status of the source file.",
     )
-    # relationships
-    tasks: List["Task"] = Relationship(back_populates="task")
 
 
 class Task(SQLModel, table=True):
@@ -40,6 +38,14 @@ class Task(SQLModel, table=True):
     models: Tuple[str] = Field(
         sa_column=Column(ARRAY(TEXT), default=[]),
         description="List of models to use when processing the task. Usually, it's one detector and one tracker.",
+    )
+    output_method: enums.TaskOutputMethod = Field(
+        sa_column=Column(Enum(enums.TaskOutputMethod, name="task_output_method"), nullable=False),
+        description="Method used for creating an output of the task.",
+    )
+    output_path: str = Field(
+        sa_column=Column(TEXT, nullable=False, unique=True),
+        description="Output file generated as a result of a task.",
     )
     parameters: Dict[str, Any] = Field(
         sa_column=Column(JSON, default={}),

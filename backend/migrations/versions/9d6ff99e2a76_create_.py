@@ -1,16 +1,17 @@
 """Create source file and task tables.
 
-Revision ID: acbd8bf7d495
+Revision ID: 9d6ff99e2a76
 Revises: 
-Create Date: 2022-02-19 09:41:31.426123
+Create Date: 2022-02-19 14:28:24.334267
 
 """
 from alembic import op
 import sqlalchemy as sa
+import sqlmodel
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = "acbd8bf7d495"
+revision = "9d6ff99e2a76"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -35,6 +36,8 @@ def upgrade():
         "task",
         sa.Column("id", postgresql.UUID(), nullable=False),
         sa.Column("models", sa.ARRAY(sa.TEXT()), nullable=True),
+        sa.Column("output_method", sa.Enum("file", "video", name="task_output_method"), nullable=False),
+        sa.Column("output_path", sa.TEXT(), nullable=False),
         sa.Column("parameters", sa.JSON(), nullable=True),
         sa.Column(
             "status",
@@ -48,6 +51,7 @@ def upgrade():
             ["source_file.id"],
         ),
         sa.PrimaryKeyConstraint("id"),
+        sa.UniqueConstraint("output_path"),
     )
 
 

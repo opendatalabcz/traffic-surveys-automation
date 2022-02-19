@@ -5,7 +5,7 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import AsyncEngine
 from tsa.app.database import create_database_dsn
-from tsa.app.schema import SQLModel
+from tsa.app.schemas.base import SQLModel
 
 from alembic import context
 

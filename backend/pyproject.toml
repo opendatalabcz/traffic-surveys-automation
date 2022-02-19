@@ -10,6 +10,7 @@ authors = ["Ondrej Pudiš <pudisond@fit.cvut.cz>"]
 repository = "https://github.com/opendatalabcz/traffic-surveys-automation"
 
 [tool.poetry.dependencies]
+aiofiles = "^0.8.0"
 alembic = "^1.7.6"
 asyncpg = "^0.25.0"
 click = "^8.0.3"
@@ -45,3 +46,4 @@ build-backend = "poetry.core.masonry.api"
 [tool.poe.tasks]
 black = "black -l 120 -t py39 tsa/ cli/"
 test = "pytest test/"
+run = "uvicorn tsa.app.app:fast_app --reload"
