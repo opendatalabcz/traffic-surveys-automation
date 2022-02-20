@@ -5,6 +5,8 @@ from konfetti import env
 DATABASE_URL = env("DATABASE_URL")
 DATABASE_NAME = env("DATABASE_NAME")
 
+CELERY_BROKER = env("CELERY_BROKER", default="redis://localhost:6379/1")
+
 MODELS_PATH = env("MODELS_PATH", cast=Path)
 
 SOURCE_FILES_PATH = env("SOURCE_FILES_PATH", cast=Path)

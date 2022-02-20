@@ -1,8 +1,9 @@
 from typing import List
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.dialects.postgresql import insert
 
+from tsa import enums
 from tsa.app.database import DatabaseRepository
 from tsa.app.schemas.task import Task, TaskModel
 
@@ -26,3 +27,8 @@ class TaskRepository(DatabaseRepository):
 
         raw_result = await self._connection.execute(statement)
         return TaskModel(**raw_result.one())
+
+    async def update_state(self, task_id: int, new_state: enums.TaskStatus):
+        statement = update(TaskModel).values(status=new_state.value).where(TaskModel.id == task_id)
+
+        await self._connection.execute(statement)

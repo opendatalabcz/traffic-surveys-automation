@@ -1,5 +1,4 @@
-from .efficientdet import EfficientDetD6
+from .efficientdet import EfficientDetD5AdvPropAA, EfficientDetD6
 
-# from .tf_models import TFFasterRCNNResnet
 
-__all__ = ["EfficientDetD6"]
+__all__ = ["EfficientDetD5AdvPropAA", "EfficientDetD6"]
