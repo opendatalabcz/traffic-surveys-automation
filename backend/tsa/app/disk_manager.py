@@ -14,6 +14,9 @@ class DiskManager:
     def read_source_files_folder(self) -> Set[Path]:
         return self.read_folder(self.source_files_dir)
 
+    def exists_in_source_files_folder(self, path: str) -> bool:
+        return (self.source_files_dir / path).exists()
+
     def read_folder(self, folder: Path) -> Set[Path]:
         paths_generator = chain.from_iterable(
             folder.glob(f"*.{source_format}") for source_format in self.ALLOWED_SOURCE_FORMATS

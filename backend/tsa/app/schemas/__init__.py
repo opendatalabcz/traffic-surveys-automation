@@ -1,5 +1,14 @@
-from .base import Task, SourceFile as SourceFileModel
-from .source_file import SourceFile, SourceFileWithTasks
+from .line import Lines, LinesBase, ResponseLine
+from .source_file import SourceFile, SourceFileBase, SourceFileWithTasks
+from .task import Task
 
 
-__all__ = ["SourceFile", "SourceFileModel", "SourceFileWithTasks", "Task"]
+__all__ = [
+    "Lines",
+    "LinesBase",
+    "ResponseLine",
+    "SourceFile",
+    "SourceFileBase",
+    "SourceFileWithTasks",
+    "Task",
+]
