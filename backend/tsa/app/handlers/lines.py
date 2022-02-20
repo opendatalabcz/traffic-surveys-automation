@@ -26,8 +26,8 @@ async def count_vehicles(
     lines_repository: LinesRepository = Depends(LinesRepository),
     task_repository: TaskRepository = Depends(TaskRepository),
 ):
-    lines = await lines_repository.get(lines_id)
-    task = await task_repository.get(lines.task_id)
+    lines = await lines_repository.get_one(lines_id)
+    task = await task_repository.get_one(lines.task_id)
 
     counts = perform_count_vehicles(
         FileStorageMethod(config.OUTPUT_FILES_PATH / task.output_path),
@@ -39,10 +39,15 @@ async def count_vehicles(
         ResponseLine(source_name=line.name, destination_name="UNDEFINED", count=counts[i][-1])
         for i, line in enumerate(lines.lines)
     ]
-    response_counts_known = [
-        ResponseLine(source_name=lines.lines[a].name, destination_name=lines.lines[b].name, count=counts[a][b])
-        for a, b in permutations(range(len(lines.lines)))
-        if a != b
-    ]
+
+    response_counts_known = (
+        [
+            ResponseLine(source_name=lines.lines[a].name, destination_name=lines.lines[b].name, count=counts[a][b])
+            for a, b in permutations(range(len(lines.lines)))
+            if a != b
+        ]
+        if len(lines.lines) > 1
+        else []
+    )
 
     return response_counts_known + response_counts_unknown

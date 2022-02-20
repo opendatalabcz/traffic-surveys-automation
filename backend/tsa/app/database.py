@@ -19,6 +19,6 @@ async def db_connection() -> AsyncConnection:
         yield connection
 
 
-class DatabaseRepository:
-    def __init__(self, connection: AsyncConnection = Depends(db_connection)):
-        self._connection = connection
+async def get_db_connection() -> AsyncConnection:
+    async with db_connection() as connection:
+        yield connection

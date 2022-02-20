@@ -30,8 +30,8 @@ async def visualization(
     source_file_repository: SourceFileRepository = Depends(SourceFileRepository),
     task_repository: TaskRepository = Depends(TaskRepository),
 ):
-    task = await task_repository.get(task_id)
-    source_file = await source_file_repository.get(task.source_file_id)
+    task = await task_repository.get_one(task_id)
+    source_file = await source_file_repository.get_one(task.source_file_id)
 
     if task.output_method != enums.TaskOutputMethod.file:
         raise HTTPException(
@@ -56,4 +56,4 @@ async def store_lines(
     lines: Lines,
     lines_repository: LinesRepository = Depends(LinesRepository),
 ) -> LinesBase:
-    return await lines_repository.create(task_id, lines)
+    return await lines_repository.create(lines, task_id=task_id)
