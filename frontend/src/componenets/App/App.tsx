@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Link, Routes, Route, useLocation } from 'react
 import { SourceFileDetail } from '../SourceFileDetail/SourceFileDetail';
 
 import { SourceFileList } from '../SourceFileList/SourceFileList';
+import { TaskDetail } from '../TaskDetail/TaskDetail';
 
 const Header = () => {
   const location = useLocation();
@@ -27,6 +28,7 @@ const Content = () => (
   <Routes>
     <Route path="/" element={<SourceFileList />} />
     <Route path="/source_file/:id" element={<SourceFileDetail />} />
+    <Route path="/task/:taskId" element={<TaskDetail />} />
   </Routes>
 );
 

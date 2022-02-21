@@ -6,10 +6,21 @@ from tsa.app.internal.task_visualization import create_task_visualization
 from tsa.app.repositories.lines import LinesRepository
 from tsa.app.repositories.source_file import SourceFileRepository
 from tsa.app.repositories.task import TaskRepository
-from tsa.app.schemas import Lines, LinesBase
+from tsa.app.schemas import Lines, LinesBase, Task
 from tsa.config import config
 
 router = APIRouter(prefix="/task", tags=["tasks"])
+
+
+@router.get(
+    "/{task_id}",
+    description="Get details of a task.",
+    responses={status.HTTP_404_NOT_FOUND: {"description": "The task does not exist."}},
+    response_model=Task,
+    status_code=status.HTTP_200_OK,
+)
+async def get_task(task_id: int, task_repository: TaskRepository = Depends(TaskRepository)) -> Task:
+    return await task_repository.get_one(task_id)
 
 
 @router.get(
