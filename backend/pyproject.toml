@@ -10,7 +10,13 @@ authors = ["Ondrej Pudiš <pudisond@fit.cvut.cz>"]
 repository = "https://github.com/opendatalabcz/traffic-surveys-automation"
 
 [tool.poetry.dependencies]
+aiofiles = "^0.8.0"
+alembic = "^1.7.6"
+asyncpg = "^0.25.0"
+celery = {extras = ["redis"], version = "^5.2.3"}
 click = "^8.0.3"
+fastapi = "^0.74.0"
+Jinja2 = "^3.0.3"
 konfetti = "^0.8.0"
 matplotlib = "^3.5.1"
 numpy = "^1.21.5"
@@ -23,6 +29,8 @@ tensorflow-hub = "^0.12.0"
 tensorflow = "^2.7.0"
 scikit-learn = "^1.0.2"
 Shapely = "^1.8.0"
+sqlmodel = {extras = ["asyncio"], version = "^0.0.6"}
+uvicorn = {extras = ["standard"], version = "^0.17.5"}
 
 [tool.poetry.dev-dependencies]
 black = "^21.12b0"
@@ -39,3 +47,5 @@ build-backend = "poetry.core.masonry.api"
 [tool.poe.tasks]
 black = "black -l 120 -t py39 tsa/ cli/"
 test = "pytest test/"
+run = "uvicorn tsa.app.app:fast_app --reload"
+worker = "celery -A tsa.app.celery:celery_app worker -c 1"
