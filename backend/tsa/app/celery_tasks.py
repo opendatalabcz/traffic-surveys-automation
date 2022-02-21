@@ -59,8 +59,8 @@ async def _change_db_statuses(
 @async_task()
 async def run_task(task_id: int):
     async with db_connection() as connection:
-        task = await TaskRepository(connection).get(task_id)
-        source_file = await SourceFileRepository(connection).get(task.source_file_id)
+        task = await TaskRepository(connection).get_one(task_id)
+        source_file = await SourceFileRepository(connection).get_one(task.source_file_id)
 
     try:
         await _run_task(task, source_file)
