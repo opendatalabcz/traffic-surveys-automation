@@ -1,6 +1,6 @@
 from .line import Lines, LinesBase, ResponseLine
 from .source_file import SourceFile, SourceFileBase, SourceFileWithTasks
-from .task import Task
+from .task import Task, TaskWithLines
 
 
 __all__ = [
@@ -11,4 +11,5 @@ __all__ = [
     "SourceFileBase",
     "SourceFileWithTasks",
     "Task",
+    "TaskWithLines",
 ]

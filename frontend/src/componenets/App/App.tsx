@@ -3,6 +3,7 @@ import { SourceFileDetail } from '../SourceFileDetail/SourceFileDetail';
 
 import { SourceFileList } from '../SourceFileList/SourceFileList';
 import { TaskDetail } from '../TaskDetail/TaskDetail';
+import { TaskVisualization } from '../TaskDetail/TaskVisualization';
 
 const Header = () => {
   const location = useLocation();
@@ -29,6 +30,7 @@ const Content = () => (
     <Route path="/" element={<SourceFileList />} />
     <Route path="/source_file/:id" element={<SourceFileDetail />} />
     <Route path="/task/:taskId" element={<TaskDetail />} />
+    <Route path="/task/:taskId/visualization" element={<TaskVisualization />} />
   </Routes>
 );
 
@@ -37,7 +39,7 @@ export const App = () => (
     <div className="container">
       <Header />
 
-      <div id="content" className="row col-md-12">
+      <div id="content">
         <Content />
       </div>
     </div>

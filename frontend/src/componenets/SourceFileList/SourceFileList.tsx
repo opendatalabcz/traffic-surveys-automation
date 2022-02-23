@@ -18,7 +18,7 @@ const SourceFileRow = ({ data }: SourceFileProps): JSX.Element => (
         <i className="bi bi-x-circle text-danger"></i>
       )}
     </td>
-    <td className="pe-0">
+    <td>
       {data.file_exists && (
         <button
           type="button"
@@ -26,25 +26,14 @@ const SourceFileRow = ({ data }: SourceFileProps): JSX.Element => (
           data-bs-toggle="modal"
           data-bs-target="#createNewTaskModal"
         >
-          <i
-            className="bi bi-plus"
-            data-bs-toggle="tooltip"
-            data-bs-placement="bottom"
-            title="Create a new task for the source file."
-          ></i>
+          <i className="bi bi-plus"></i>
+          <span className="ms-1">New task</span>
         </button>
       )}
       <Link to={`/source_file/${data.id}`} className="btn btn-sm btn-outline-primary me-1">
-        <i
-          className="bi bi-search"
-          data-bs-toggle="tooltip"
-          data-bs-placement="top"
-          title="Show source file details."
-        ></i>
+        <i className="bi bi-search"></i>
+        <span className="ms-1">Detail</span>
       </Link>
-      <button className="btn btn-sm btn-outline-danger">
-        <i className="bi bi-trash" data-bs-toggle="tooltip" data-bs-placement="top" title="Delete the source file."></i>
-      </button>
     </td>
   </tr>
 );

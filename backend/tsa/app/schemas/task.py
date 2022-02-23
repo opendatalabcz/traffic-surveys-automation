@@ -1,10 +1,11 @@
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from pydantic import BaseModel
 from sqlmodel import ARRAY, Column, Field, Enum, JSON, TEXT
 from tsa import enums
 
 from .base import SQLModel
+from .line import LinesBase
 
 
 class Task(SQLModel):
@@ -37,6 +38,10 @@ class Task(SQLModel):
 
 class TaskModel(Task, table=True):
     __tablename__ = "task"
+
+
+class TaskWithLines(Task):
+    lines: List[LinesBase]
 
 
 class NewTask(BaseModel):

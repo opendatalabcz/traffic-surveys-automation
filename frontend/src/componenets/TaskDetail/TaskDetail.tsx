@@ -1,56 +1,48 @@
-import { useEffect, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import CanvasDraw from 'react-canvas-draw';
+import { useEffect, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
 
 import { TaskClient } from '../../api/task';
-import { Task } from '../../types';
+import { Lines, Task } from '../../types';
 
-type VisualizationDetailProps = {
-  client: TaskClient;
-  taskId: number;
+type LinesRowProps = {
+  data: Lines;
 };
 
-const VisualizationDetail = ({ client, taskId }: VisualizationDetailProps) => {
-  const [image, setImage] = useState<string>();
-  const canvas = useRef<CanvasDraw>(null);
-
-  useEffect(() => {
-    client.getVisualization(taskId).then(data => setImage(URL.createObjectURL(data)));
-  }, [taskId]);
-
-  return (
-    <div className="col-12">
-      <div className="btn-group offset-9 col-3 my-1">
-        <button type="button" className="btn btn-outline-secondary" onClick={() => canvas.current?.clear()}>
-          Clear
-        </button>
-        <button type="button" className="btn btn-outline-success">
-          Save
-        </button>
-      </div>
-
-      {image && (
-        <CanvasDraw
-          ref={canvas}
-          imgSrc={image}
-          hideGrid={true}
-          brushColor="#00000"
-          brushRadius={3}
-          hideInterface={true}
-          canvasWidth={1280}
-          canvasHeight={720}
-        />
-      )}
-      {!image && (
-        <div className="d-flex justify-content-center">
-          <div className="spinner-grow" style={{ width: '3rem', height: '3rem' }} role="loading">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
+const LinesRow = ({ data }: LinesRowProps) => (
+  <tr className="align-middle">
+    <td>
+      <ul className="list-group list-group-horizontal">
+        {data.lines.map(line => (
+          <li className="list-group-item">{line.name}</li>
+        ))}
+      </ul>
+    </td>
+    <td>
+      <ul className="list-group list-group-horizontal">
+        {data.lines.map(line => (
+          <li className="list-group-item">
+            <span className="badge bg-secondary me-1">
+              {line.start_point[0]} | {line.start_point[1]}
+            </span>
+            <span className="badge bg-secondary">
+              {line.end_point[0]} | {line.end_point[1]}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </td>
+    <td>
+      <Link to={`/count/${data.id}`} className="btn btn-sm btn-outline-primary me-1">
+        <i className="bi bi-eye"></i>
+        <span className="ms-1">Show</span>
+      </Link>
+      <Link to={`/count/${data.id}`} className="btn btn-sm btn-outline-info me-1">
+        <i className="bi bi-cloud-arrow-down"></i>
+        <span className="ms-1">Download</span>
+      </Link>
+    </td>
+  </tr>
+);
 
 export const TaskDetail = () => {
   const { taskId } = useParams();
@@ -63,8 +55,35 @@ export const TaskDetail = () => {
   }, [taskId]);
 
   return (
-    <div className="col-12">
-      {data && data.output_method == 'file' && <VisualizationDetail client={taskClient} taskId={data.id} />}
+    <div>
+      <div className="row my-1">
+        <h3 className="col-6">Task lines</h3>
+
+        <ul className="nav justify-content-end col-6">
+          <li className="nav-item">
+            <Link to={`/task/${data?.id}/visualization`} className="btn btn-outline-success">
+              <i className="bi bi-plus"></i>
+              New visualization
+            </Link>
+          </li>
+        </ul>
+      </div>
+
+      <table className="table">
+        <thead className="table-light">
+          <tr>
+            <th>Name</th>
+            <th>Points</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {data?.lines.map(row => (
+            <LinesRow data={row} key={row.id} />
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 };
