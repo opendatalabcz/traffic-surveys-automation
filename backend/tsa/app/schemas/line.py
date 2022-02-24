@@ -1,9 +1,14 @@
-from typing import Tuple, List, Optional
+from typing import List, Optional
 
 from pydantic import BaseModel
-from sqlmodel import ARRAY, Column, Field, FLOAT, JSON, TEXT
+from sqlmodel import Column, Field, JSON, TEXT
 
 from .base import SQLModel
+
+
+class Point(BaseModel):
+    x: float
+    y: float
 
 
 class Line(BaseModel):
@@ -11,11 +16,11 @@ class Line(BaseModel):
         sa_column=Column(TEXT, nullable=False),
         description="Name of a single line. This helps to users to identify lines in the result matrix.",
     )
-    start_point: Tuple[float, float] = Field(
-        sa_column=Column(ARRAY(FLOAT), nullable=False), description="[x, y] coordinates defining a start of a line."
+    start: Point = Field(
+        sa_column=Column(JSON, nullable=False), description="[x, y] coordinates defining a start of a line."
     )
-    end_point: Tuple[float, float] = Field(
-        sa_column=Column(ARRAY(FLOAT), nullable=False), description="[x, y] coordinates defining an end of a line."
+    end: Point = Field(
+        sa_column=Column(JSON, nullable=False), description="[x, y] coordinates defining an end of a line."
     )
 
 

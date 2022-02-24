@@ -2,8 +2,8 @@ import { OutputType } from './enums';
 
 export type Line = {
   name: string;
-  start_point: number[];
-  end_point: number[];
+  start: Point;
+  end: Point;
 };
 
 export type Lines = {
@@ -12,15 +12,9 @@ export type Lines = {
   lines: Line[];
 };
 
-export type Task = {
-  id: number;
-  source_file_id: number;
-  output_method: OutputType;
-  output_path: string;
-  status: string;
-  models: string[];
-  parameters: { [id: string]: string | number };
-  lines: Lines[];
+export type Point = {
+  x: number;
+  y: number;
 };
 
 export type SourceFile = {
@@ -33,4 +27,15 @@ export type SourceFile = {
 
 export type SourceFileWithTasks = SourceFile & {
   tasks: Task[];
+};
+
+export type Task = {
+  id: number;
+  source_file_id: number;
+  output_method: OutputType;
+  output_path: string;
+  status: string;
+  models: string[];
+  parameters: { [id: string]: string | number };
+  lines: Lines[];
 };

@@ -1,82 +1,57 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useResizeDetector } from 'react-resize-detector';
+import { Line, Point } from '../types';
 
-type CanvasProps = {
-  imageSrc: string;
+type LineCanvasProps = {
+  image: string;
+  lines: Line[];
+  onClick: (point: Point) => void;
 };
 
-export const Canvas = (props: CanvasProps) => {
+export const LineCanvas = ({ image, lines, onClick }: LineCanvasProps) => {
+  const { width, height, ref } = useResizeDetector();
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const imageRef = useRef<HTMLImageElement>(null);
-  const [drawContext, setDrawContext] = useState<CanvasRenderingContext2D>();
 
-  const draw = (event: React.MouseEvent) => {
-    updateSize();
-    console.log(event);
-
-    if (drawContext) {
-      drawContext.beginPath();
-      drawContext.moveTo(0, 0);
-      drawContext.lineTo(event.clientX, event.clientY);
-      drawContext.closePath();
-      drawContext.stroke();
-    }
-  };
-
-  const updateSize = () => {
-    if (canvasRef.current && imageRef.current) {
-      canvasRef.current.height = imageRef.current.height;
-      canvasRef.current.width = imageRef.current.width;
-    }
-  };
+  const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>();
+  useEffect(() => setCtx(canvasRef.current?.getContext('2d')), [canvasRef]);
 
   useEffect(() => {
-    const draw = canvasRef.current?.getContext('2d');
+    if (!ctx) return;
 
-    if (draw) {
-      console.log('New context');
-      draw.lineWidth = 100;
-      setDrawContext(draw);
+    if (!lines.length) {
+      ctx.clearRect(0, 0, width ?? 0, height ?? 0);
+      return;
     }
-  }, [canvasRef]);
+
+    ctx.lineWidth = 6;
+
+    lines.map(line => {
+      ctx.beginPath();
+      ctx.moveTo(line.start.x, line.start.y);
+      ctx.lineTo(line.end.x, line.end.y);
+      ctx.stroke();
+    });
+  }, [lines]);
+
+  const draw = (event: React.MouseEvent) => {
+    const offsets = canvasRef.current?.getBoundingClientRect();
+
+    if (!offsets) return;
+
+    onClick({ x: event.clientX - offsets.left, y: event.clientY - offsets.top });
+  };
 
   return (
-    <div className="position-relative">
-      <img ref={imageRef} src={props.imageSrc} className="position-absolute top-0 start-0 img-fluid" />
-      <canvas ref={canvasRef} className="position-absolute top-0 start-0 w-100" onMouseDown={draw}></canvas>
+    <div className="position-relative user-select-none">
+      <img ref={ref} src={image} className="position-absolute top-0 start-0 img-fluid" />
+      <canvas
+        width={width}
+        height={height}
+        ref={canvasRef}
+        className="position-absolute top-0 start-0"
+        onMouseDown={draw}
+      ></canvas>
     </div>
   );
 };
-
-// $(document).ready(function(){
-
-//   var imageDpi = 300;
-
-//   var can = document.getElementById('canvas');
-//   var ctx = can.getContext('2d');
-//   var startX, startY;
-
-//   $("canvas").mousedown(function(event){
-//       startX = event.pageX;
-//       startY= event.pageY;
-
-//       $(this).bind('mousemove', function(e){
-//           drawLine(startX, startY, e.pageX, e.pageY);
-//       });
-//   }).mouseup(function(){
-//       $(this).unbind('mousemove');
-//   });
-
-//   function drawLine(x, y, stopX, stopY){
-//       ctx.clearRect (0, 0, can.width, can.height);
-//       ctx.beginPath();
-//       ctx.moveTo(x, y);
-//       ctx.lineTo(stopX, stopY);
-//       ctx.closePath();
-//       ctx.stroke();
-
-//       // calculate length
-//       var pixelLength = Math.sqrt(Math.pow((stopX - x),2) + Math.pow((stopY-y),2));
-//       var physicalLength = pixelLength / imageDpi;
-//       console.log("line length = " + physicalLength + " inches (image at " + imageDpi + " dpi)");
-//   }
-// });

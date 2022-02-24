@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 
 import { TaskClient } from '../../api/task';
 import { Lines, Task } from '../../types';
+import { PointBadge } from '../views';
 
 type LinesRowProps = {
   data: Lines;
@@ -21,12 +22,8 @@ const LinesRow = ({ data }: LinesRowProps) => (
       <ul className="list-group list-group-horizontal">
         {data.lines.map(line => (
           <li className="list-group-item">
-            <span className="badge bg-secondary me-1">
-              {line.start_point[0]} | {line.start_point[1]}
-            </span>
-            <span className="badge bg-secondary">
-              {line.end_point[0]} | {line.end_point[1]}
-            </span>
+            <PointBadge point={line.start} />
+            <PointBadge point={line.end} />
           </li>
         ))}
       </ul>

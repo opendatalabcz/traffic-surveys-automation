@@ -1,5 +1,5 @@
 import { HttpClient } from './http-client';
-import { Task } from '../types';
+import { Line, Task } from '../types';
 
 export class TaskClient extends HttpClient {
   public constructor() {
@@ -10,4 +10,7 @@ export class TaskClient extends HttpClient {
 
   public getVisualization = (taskId: number) =>
     this.instance.get(`${taskId}/visualization`, { responseType: 'blob' }).then(response => response.data);
+
+  public createLines = (taskId: number, lines: Line[]) =>
+    this.instance.post(`${taskId}/lines`, { lines: lines }).then(response => response.data);
 }
