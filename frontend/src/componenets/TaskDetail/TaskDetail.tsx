@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 
 import { TaskClient } from '../../api/task';
 import { Lines, Task } from '../../types';
-import { PointBadge } from '../views';
+import { PointBadge, TitleView } from '../views';
 
 type LinesRowProps = {
   data: Lines;
@@ -12,21 +12,21 @@ type LinesRowProps = {
 const LinesRow = ({ data }: LinesRowProps) => (
   <tr className="align-middle">
     <td>
-      <ul className="list-group list-group-horizontal">
-        {data.lines.map(line => (
-          <li className="list-group-item">{line.name}</li>
+      <div className="vstack gap-1 text-end">
+        {data.lines.map((line, index) => (
+          <span key={index}>{line.name}</span>
         ))}
-      </ul>
+      </div>
     </td>
     <td>
-      <ul className="list-group list-group-horizontal">
-        {data.lines.map(line => (
-          <li className="list-group-item">
+      <div className="vstack gap-2">
+        {data.lines.map((line, index) => (
+          <div className="hstack gap-1" key={index}>
             <PointBadge point={line.start} />
             <PointBadge point={line.end} />
-          </li>
+          </div>
         ))}
-      </ul>
+      </div>
     </td>
     <td>
       <Link to={`/count/${data.id}`} className="btn btn-sm btn-outline-primary me-1">
@@ -36,6 +36,10 @@ const LinesRow = ({ data }: LinesRowProps) => (
       <Link to={`/count/${data.id}`} className="btn btn-sm btn-outline-info me-1">
         <i className="bi bi-cloud-arrow-down"></i>
         <span className="ms-1">Download</span>
+      </Link>
+      <Link to={`/count/${data.id}`} className="btn btn-sm btn-outline-danger me-1">
+        <i className="bi bi-trash"></i>
+        <span className="ms-1">Delete</span>
       </Link>
     </td>
   </tr>
@@ -53,17 +57,13 @@ export const TaskDetail = () => {
 
   return (
     <div>
-      <div className="row my-1">
-        <h3 className="col-6">Task lines</h3>
+      <TitleView title="Task lines" backLink={`/source_file/${data?.source_file_id}`} />
 
-        <ul className="nav justify-content-end col-6">
-          <li className="nav-item">
-            <Link to={`/task/${data?.id}/visualization`} className="btn btn-outline-success">
-              <i className="bi bi-plus"></i>
-              New visualization
-            </Link>
-          </li>
-        </ul>
+      <div className="d-flex justify-content-end my-1">
+        <Link to={`/task/${data?.id}/visualization`} className="btn btn-outline-success">
+          <i className="bi bi-plus"></i>
+          New visualization
+        </Link>
       </div>
 
       <table className="table">

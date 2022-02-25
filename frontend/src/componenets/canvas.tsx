@@ -5,16 +5,18 @@ import { Line, Point } from '../types';
 type LineCanvasProps = {
   image: string;
   lines: Line[];
-  onClick: (point: Point) => void;
+  onNewLine: (line: Line) => void;
 };
 
-export const LineCanvas = ({ image, lines, onClick }: LineCanvasProps) => {
+export const LineCanvas = ({ image, lines, onNewLine }: LineCanvasProps) => {
   const { width, height, ref } = useResizeDetector();
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>();
   useEffect(() => setCtx(canvasRef.current?.getContext('2d')), [canvasRef]);
+
+  const [unpairedPoint, setUnpairdPoint] = useState<Point | null>(null);
 
   useEffect(() => {
     if (!ctx) return;
@@ -34,12 +36,22 @@ export const LineCanvas = ({ image, lines, onClick }: LineCanvasProps) => {
     });
   }, [lines]);
 
-  const draw = (event: React.MouseEvent) => {
+  const createNewPoint = (point: Point) => {
+    if (unpairedPoint) {
+      onNewLine({ start: unpairedPoint, end: point, name: '' });
+      setUnpairdPoint(null);
+      return;
+    }
+
+    setUnpairdPoint(point);
+  };
+
+  const onCreateNewPoint = (event: React.MouseEvent) => {
     const offsets = canvasRef.current?.getBoundingClientRect();
 
     if (!offsets) return;
 
-    onClick({ x: event.clientX - offsets.left, y: event.clientY - offsets.top });
+    createNewPoint({ x: event.clientX - offsets.left, y: event.clientY - offsets.top });
   };
 
   return (
@@ -50,7 +62,7 @@ export const LineCanvas = ({ image, lines, onClick }: LineCanvasProps) => {
         height={height}
         ref={canvasRef}
         className="position-absolute top-0 start-0"
-        onMouseDown={draw}
+        onMouseDown={onCreateNewPoint}
       ></canvas>
     </div>
   );

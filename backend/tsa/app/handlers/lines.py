@@ -31,7 +31,7 @@ async def count_vehicles(
 
     counts = perform_count_vehicles(
         FileStorageMethod(config.OUTPUT_FILES_PATH / task.output_path),
-        [Line([line.start_point, line.end_point]) for line in lines.lines],
+        [Line([line.start, line.end]) for line in lines.lines],
     )
     counts = counts.tolist()
 
@@ -51,3 +51,13 @@ async def count_vehicles(
     )
 
     return response_counts_known + response_counts_unknown
+
+
+@router.delete(
+    "/{lines_id}",
+    description="Delete selected lines.",
+    responses={status.HTTP_404_NOT_FOUND: {"description": "Lines were not found."}},
+    status_code=status.HTTP_200_OK,
+)
+async def delete_lines(lines_id: int, lines_repository: LinesRepository = Depends(LinesRepository)):
+    await lines_repository.delete(lines_id)

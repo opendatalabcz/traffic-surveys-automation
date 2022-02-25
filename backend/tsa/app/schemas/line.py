@@ -12,16 +12,9 @@ class Point(BaseModel):
 
 
 class Line(BaseModel):
-    name: str = Field(
-        sa_column=Column(TEXT, nullable=False),
-        description="Name of a single line. This helps to users to identify lines in the result matrix.",
-    )
-    start: Point = Field(
-        sa_column=Column(JSON, nullable=False), description="[x, y] coordinates defining a start of a line."
-    )
-    end: Point = Field(
-        sa_column=Column(JSON, nullable=False), description="[x, y] coordinates defining an end of a line."
-    )
+    name: str = Field(description="Name of a single line. This helps to users to identify lines in the result matrix.")
+    start: Point
+    end: Point
 
 
 class ResponseLine(BaseModel):

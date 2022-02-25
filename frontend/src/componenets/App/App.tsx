@@ -1,25 +1,18 @@
-import { BrowserRouter as Router, Link, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { SourceFileDetail } from '../SourceFileDetail/SourceFileDetail';
 
 import { SourceFileList } from '../SourceFileList/SourceFileList';
 import { TaskDetail } from '../TaskDetail/TaskDetail';
 import { TaskVisualization } from '../TaskDetail/TaskVisualization';
+import { Navigation } from './Navigation';
 
 const Header = () => {
-  const location = useLocation();
-
   return (
     <div id="header" className="row col-12 my-1">
       <h2 className="col-6">Traffic Survey Automator</h2>
 
-      <div className="col-6">
-        <ul className="nav nav-pills justify-content-end">
-          <li className="nav-item">
-            <Link to="/" className={`nav-link ${location.pathname == '/' ? 'active' : ''}`}>
-              Home
-            </Link>
-          </li>
-        </ul>
+      <div className="col-6 justify-content-end">
+        <Navigation />
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 from typing import Callable, Generic, List, TypeVar
 
 from fastapi import Depends
-from sqlalchemy import and_, insert, select, update
+from sqlalchemy import and_, delete, insert, select, update
 from sqlalchemy.engine import Result
 from sqlalchemy.ext.asyncio import AsyncConnection
 from sqlmodel import SQLModel
@@ -43,6 +43,11 @@ class DatabaseRepository(Generic[T, K]):
     async def update(self, *, conditions: List, **values):
         await self._execute_statement(
             update(self.model).values(**values).where(and_(*conditions)),
+        )
+
+    async def delete(self, primary_key: int):
+        await self._execute_statement(
+            delete(self.model).where(self.model.id == primary_key),
         )
 
     async def _execute_statement(self, statement) -> Result:

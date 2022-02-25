@@ -8,6 +8,13 @@ export enum DetectionModel {
   efficientdet_d5_adv_prop = 'efficientdet_d5_adv_prop',
 }
 
+export enum SourceFileStatus {
+  new = 'new',
+  processing = 'processing',
+  processed = 'processed',
+  deleted = 'deleted',
+}
+
 export enum TrackingModel {
   simple_sort = 'simple_sort',
   deep_sort = 'deep_sort',

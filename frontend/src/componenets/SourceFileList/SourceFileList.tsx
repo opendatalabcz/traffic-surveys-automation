@@ -10,15 +10,15 @@ const SourceFileRow = ({ data }: SourceFileProps): JSX.Element => (
     <td>{data.id}</td>
     <td>{data.name}</td>
     <td>{data.path}</td>
-    <td>{data.status}</td>
-    <td>
+    <td className="text-end">{data.status}</td>
+    <td className="text-end">
       {data.file_exists ? (
         <i className="bi bi-check-circle text-success"></i>
       ) : (
         <i className="bi bi-x-circle text-danger"></i>
       )}
     </td>
-    <td>
+    <td className="text-end">
       {data.file_exists && (
         <button
           type="button"
@@ -53,9 +53,9 @@ export const SourceFileList = (): JSX.Element => {
           <th>#</th>
           <th>Name</th>
           <th>Path</th>
-          <th>Status</th>
-          <th>Exists</th>
-          <th>Actions</th>
+          <th className="text-end">Status</th>
+          <th className="text-end">Exists</th>
+          <th className="text-end">Actions</th>
         </tr>
       </thead>
 
