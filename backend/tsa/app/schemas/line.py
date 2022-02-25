@@ -1,7 +1,7 @@
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from pydantic import BaseModel
-from sqlmodel import Column, Field, JSON, TEXT
+from sqlmodel import Column, Field, JSON
 
 from .base import SQLModel
 
@@ -10,6 +10,9 @@ class Point(BaseModel):
     x: float
     y: float
 
+    def as_tuple(self) -> Tuple[float, float]:
+        return self.x, self.y
+
 
 class Line(BaseModel):
     name: str = Field(description="Name of a single line. This helps to users to identify lines in the result matrix.")
@@ -17,10 +20,9 @@ class Line(BaseModel):
     end: Point
 
 
-class ResponseLine(BaseModel):
-    source_name: str
-    destination_name: str
-    count: int
+class LinesResponse(BaseModel):
+    names: List[str]
+    counts: List[List[int]]
 
 
 class Lines(SQLModel):

@@ -15,6 +15,13 @@ export type Lines = {
 export type Point = {
   x: number;
   y: number;
+  displayX?: number;
+  displayY?: number;
+};
+
+export type Counts = {
+  names: string[];
+  counts: number[][];
 };
 
 export type SourceFile = {

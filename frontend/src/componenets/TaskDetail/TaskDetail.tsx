@@ -1,15 +1,18 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-
+import { LinesClient } from '../../api/lines';
 import { TaskClient } from '../../api/task';
-import { Lines, Task } from '../../types';
+import { Counts, Lines, Task } from '../../types';
 import { PointBadge, TitleView } from '../views';
+import { LinesCountsModal } from './LinesCountsModal';
 
 type LinesRowProps = {
   data: Lines;
+  onShowCounts: (linesId: number) => void;
+  onDelete: (linesId: number) => void;
 };
 
-const LinesRow = ({ data }: LinesRowProps) => (
+const LinesRow = ({ data, onShowCounts, onDelete }: LinesRowProps) => (
   <tr className="align-middle">
     <td>
       <div className="vstack gap-1 text-end">
@@ -29,18 +32,14 @@ const LinesRow = ({ data }: LinesRowProps) => (
       </div>
     </td>
     <td>
-      <Link to={`/count/${data.id}`} className="btn btn-sm btn-outline-primary me-1">
+      <button type="button" className="btn btn-sm btn-outline-primary me-1" onClick={() => onShowCounts(data.id)}>
         <i className="bi bi-eye"></i>
         <span className="ms-1">Show</span>
-      </Link>
-      <Link to={`/count/${data.id}`} className="btn btn-sm btn-outline-info me-1">
-        <i className="bi bi-cloud-arrow-down"></i>
-        <span className="ms-1">Download</span>
-      </Link>
-      <Link to={`/count/${data.id}`} className="btn btn-sm btn-outline-danger me-1">
+      </button>
+      <button type="button" className="btn btn-sm btn-outline-danger me-1" onClick={() => onDelete(data.id)}>
         <i className="bi bi-trash"></i>
         <span className="ms-1">Delete</span>
-      </Link>
+      </button>
     </td>
   </tr>
 );
@@ -48,12 +47,26 @@ const LinesRow = ({ data }: LinesRowProps) => (
 export const TaskDetail = () => {
   const { taskId } = useParams();
   const taskClient = new TaskClient();
+  const linesClient = new LinesClient();
 
   const [data, setData] = useState<Task>();
+  const [countsData, setCountsData] = useState<Counts>();
 
   useEffect(() => {
     if (taskId !== undefined) taskClient.getTask(parseInt(taskId)).then(data => setData(data));
   }, [taskId]);
+
+  const showCounts = (linesId: number) => {
+    linesClient.getCounts(linesId).then(data => setCountsData(data));
+  };
+
+  const deleteLinesRow = (linesId: number) => {
+    if (data) {
+      linesClient
+        .delete(linesId)
+        .then(() => setData({ ...data, lines: data.lines.filter(line => line.id != linesId) }));
+    }
+  };
 
   return (
     <div>
@@ -77,10 +90,12 @@ export const TaskDetail = () => {
 
         <tbody>
           {data?.lines.map(row => (
-            <LinesRow data={row} key={row.id} />
+            <LinesRow data={row} onShowCounts={showCounts} onDelete={deleteLinesRow} key={row.id} />
           ))}
         </tbody>
       </table>
+
+      <LinesCountsModal data={countsData} handleClose={() => setCountsData(undefined)} />
     </div>
   );
 };
