@@ -1,9 +1,10 @@
+from collections import defaultdict
 from itertools import permutations
-from typing import List
+from typing import Dict
 
 from fastapi import APIRouter, Depends, status
 
-from tsa.app.schemas import ResponseLine
+from tsa.app.schemas import LinesResponse
 from tsa.app.repositories.lines import LinesRepository
 from tsa.app.repositories.task import TaskRepository
 from tsa.config import config
@@ -18,7 +19,7 @@ router = APIRouter(prefix="/lines", tags=["lines"])
     "/{lines_id}",
     description="Count the vehicles that cross the lines.",
     responses={status.HTTP_404_NOT_FOUND: {"description": "Lines were not found."}},
-    response_model=List[ResponseLine],
+    response_model=LinesResponse,
     status_code=status.HTTP_200_OK,
 )
 async def count_vehicles(
@@ -31,23 +32,18 @@ async def count_vehicles(
 
     counts = perform_count_vehicles(
         FileStorageMethod(config.OUTPUT_FILES_PATH / task.output_path),
-        [Line([line.start_point, line.end_point]) for line in lines.lines],
+        [Line([line.start.as_tuple(), line.end.as_tuple()]) for line in lines.lines],
     )
     counts = counts.tolist()
 
-    response_counts_unknown = [
-        ResponseLine(source_name=line.name, destination_name="UNDEFINED", count=counts[i][-1])
-        for i, line in enumerate(lines.lines)
-    ]
+    return LinesResponse(names=[line.name for line in lines.lines] + ["Other direction"], counts=counts)
 
-    response_counts_known = (
-        [
-            ResponseLine(source_name=lines.lines[a].name, destination_name=lines.lines[b].name, count=counts[a][b])
-            for a, b in permutations(range(len(lines.lines)))
-            if a != b
-        ]
-        if len(lines.lines) > 1
-        else []
-    )
 
-    return response_counts_known + response_counts_unknown
+@router.delete(
+    "/{lines_id}",
+    description="Delete selected lines.",
+    responses={status.HTTP_404_NOT_FOUND: {"description": "Lines were not found."}},
+    status_code=status.HTTP_200_OK,
+)
+async def delete_lines(lines_id: int, lines_repository: LinesRepository = Depends(LinesRepository)):
+    await lines_repository.delete(lines_id)

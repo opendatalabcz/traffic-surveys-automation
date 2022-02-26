@@ -5,7 +5,7 @@ from tsa.models import abstract, detection, tracking
 from tsa.processes import run_detection_and_tracking, store_tracks
 from tsa.storage import VideoStorageMethod
 from tsa.app.celery import async_task
-from tsa.app.database import db_connection
+from tsa.app.database import database_connection
 from tsa.app.repositories.source_file import SourceFileRepository
 from tsa.app.repositories.task import TaskRepository
 from tsa.app.schemas import SourceFileBase, Task
@@ -51,19 +51,20 @@ def _init_tracking_model(model_name: enums.TrackingModel) -> abstract.TrackableM
 async def _change_db_statuses(
     source_file_id: int, task_id: int, source_file_status: enums.SourceFileStatus, task_status: enums.TaskStatus
 ):
-    async with db_connection() as connection:
-        await SourceFileRepository(connection).update_state(source_file_id, source_file_status)
-        await TaskRepository(connection).update_state(task_id, task_status)
+    async with database_connection() as db:
+        await SourceFileRepository(db).update_state(source_file_id, source_file_status)
+        await TaskRepository(db).update_state(task_id, task_status)
 
 
 @async_task()
 async def run_task(task_id: int):
-    async with db_connection() as connection:
-        task = await TaskRepository(connection).get_one(task_id)
-        source_file = await SourceFileRepository(connection).get_one(task.source_file_id)
+    async with database_connection() as db:
+        task = await TaskRepository(db).get_one(task_id)
+        source_file = await SourceFileRepository(db).get_one(task.source_file_id)
 
     try:
-        await _run_task(task, source_file)
+        with config.override(**task.parameters):
+            await _run_task(task, source_file)
     except Exception as exc:
         await _change_db_statuses(source_file.id, task.id, enums.SourceFileStatus.processed, enums.TaskStatus.failed)
         raise exc
@@ -71,8 +72,6 @@ async def run_task(task_id: int):
 
 async def _run_task(task: Task, source_file: SourceFileBase):
     await _change_db_statuses(source_file.id, task.id, enums.SourceFileStatus.processing, enums.TaskStatus.processing)
-
-    config.extend_with_object(task.parameters)
 
     video_dataset = VideoFramesDataset(
         str(config.SOURCE_FILES_PATH / source_file.path), config.VIDEO_FRAME_RATE, config.VIDEO_MAX_FRAMES

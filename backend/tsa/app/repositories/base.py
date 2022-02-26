@@ -1,35 +1,40 @@
 from typing import Callable, Generic, List, TypeVar
 
+from databases import Database
 from fastapi import Depends
-from sqlalchemy import and_, insert, select, update
-from sqlalchemy.engine import Result
-from sqlalchemy.ext.asyncio import AsyncConnection
-from sqlmodel import SQLModel
+from pydantic import BaseModel
+from sqlalchemy import and_, delete, insert, select, Table, update
 
 from tsa.app.database import get_db_connection
+from tsa.app.exceptions import NotFoundError
 
-T = TypeVar("T", SQLModel, SQLModel)
-K = TypeVar("K", Callable, SQLModel)
+K = TypeVar("K", Callable, BaseModel)
 
 
-class DatabaseRepository(Generic[T, K]):
-    model: T
+class DatabaseRepository(Generic[K]):
+    model: Table
     data_class: K
 
-    def __init__(self, connection: AsyncConnection = Depends(get_db_connection)):
+    def __init__(self, connection: Database = Depends(get_db_connection)):
         self._connection = connection
 
     async def create(self, instance: K, **additional_attributes) -> K:
-        result = await self._execute_statement(
-            insert(self.model).values(**instance.dict(exclude_none=True), **additional_attributes).returning("*"),
+        result = await self._connection.fetch_one(
+            insert(self.model)
+            .values(**instance.dict(exclude_none=True), **additional_attributes)
+            .returning(self.model),
         )
-        return self.data_class(**result.first())
+        return self.data_class(**result)
 
     async def get_one(self, primary_key: int) -> K:
-        result = await self._execute_statement(
-            select(self.model).where(self.model.id == primary_key),
+        result = await self._connection.fetch_one(
+            select(self.model).where(self.model.c.id == primary_key),
         )
-        return self.data_class(**result.one())
+
+        if not result:
+            raise NotFoundError(self.model.__name__, primary_key)
+
+        return self.data_class(**result)
 
     async def get_many(self, *conditions) -> List[K]:
         statement = select(self.model)
@@ -37,13 +42,15 @@ class DatabaseRepository(Generic[T, K]):
         if conditions:
             statement = statement.where(and_(*conditions))
 
-        results = await self._execute_statement(statement)
-        return [self.data_class(**result) for result in results.all()]
+        results = await self._connection.fetch_all(statement)
+        return [self.data_class(**result) for result in results]
 
     async def update(self, *, conditions: List, **values):
-        await self._execute_statement(
+        await self._connection.execute(
             update(self.model).values(**values).where(and_(*conditions)),
         )
 
-    async def _execute_statement(self, statement) -> Result:
-        return await self._connection.execute(statement)
+    async def delete(self, primary_key: int):
+        await self._connection.execute(
+            delete(self.model).where(self.model.c.id == primary_key),
+        )

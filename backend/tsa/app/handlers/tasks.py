@@ -1,15 +1,45 @@
+from typing import Dict, Optional, Union
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from starlette.responses import StreamingResponse
 
 from tsa import enums
+from tsa.config import config, CONFIGURABLE_VARIABLES
 from tsa.app.internal.task_visualization import create_task_visualization
 from tsa.app.repositories.lines import LinesRepository
 from tsa.app.repositories.source_file import SourceFileRepository
 from tsa.app.repositories.task import TaskRepository
-from tsa.app.schemas import Lines, LinesBase
-from tsa.config import config
+from tsa.app.schemas import Lines, LinesBase, TaskWithLines
 
 router = APIRouter(prefix="/task", tags=["tasks"])
+
+
+@router.get(
+    "/configuration",
+    description="Get the keys and default values of the default configuration.",
+    response_model=Dict[str, Union[Optional[float], Optional[int]]],
+    status_code=status.HTTP_200_OK,
+)
+async def default_configuration():
+    return {c: config.__getattr__(c) for c in CONFIGURABLE_VARIABLES}
+
+
+@router.get(
+    "/{task_id}",
+    description="Get details of a task.",
+    responses={status.HTTP_404_NOT_FOUND: {"description": "The task does not exist."}},
+    response_model=TaskWithLines,
+    status_code=status.HTTP_200_OK,
+)
+async def get_task(
+    task_id: int,
+    task_repository: TaskRepository = Depends(TaskRepository),
+    lines_repository: LinesRepository = Depends(LinesRepository),
+) -> TaskWithLines:
+    task = await task_repository.get_one(task_id)
+    all_lines = await lines_repository.get_many(task_id)
+
+    return TaskWithLines(**task.dict(), lines=all_lines)
 
 
 @router.get(

@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -16,6 +17,10 @@ router = APIRouter(prefix="/source_file", tags=["source_files"])
 def check_source_files_exist(source_files: List[SourceFileBase], location: DiskManager) -> List[bool]:
     files_on_disk = {str(path) for path in location.read_source_files_folder()}
     return [source_file.path in files_on_disk for source_file in source_files]
+
+
+def create_name_from_path(path: Path) -> str:
+    return " ".join(path.stem.split("_")).capitalize()
 
 
 @router.get(
@@ -51,7 +56,7 @@ async def discover(
     discovered_files = []
 
     for file in disk_manager.read_source_files_folder():
-        source_file = SourceFileBase(path=str(file))
+        source_file = SourceFileBase(name=create_name_from_path(file), path=str(file))
         new_object = await source_file_repository.create(source_file)
 
         if new_object is not None:

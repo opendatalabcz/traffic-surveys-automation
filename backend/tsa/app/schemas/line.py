@@ -1,48 +1,31 @@
-from typing import Tuple, List, Optional
+from typing import List, Optional, Tuple
 
-from pydantic import BaseModel
-from sqlmodel import ARRAY, Column, Field, FLOAT, JSON, TEXT
+from pydantic import BaseModel, Field
 
-from .base import SQLModel
+
+class Point(BaseModel):
+    x: int
+    y: int
+
+    def as_tuple(self) -> Tuple[int, int]:
+        return self.x, self.y
 
 
 class Line(BaseModel):
-    name: str = Field(
-        sa_column=Column(TEXT, nullable=False),
-        description="Name of a single line. This helps to users to identify lines in the result matrix.",
-    )
-    start_point: Tuple[float, float] = Field(
-        sa_column=Column(ARRAY(FLOAT), nullable=False), description="[x, y] coordinates defining a start of a line."
-    )
-    end_point: Tuple[float, float] = Field(
-        sa_column=Column(ARRAY(FLOAT), nullable=False), description="[x, y] coordinates defining an end of a line."
-    )
+    name: str = Field(description="Name of a single line. This helps to users to identify lines in the result matrix.")
+    start: Point
+    end: Point
 
 
-class ResponseLine(BaseModel):
-    source_name: str
-    destination_name: str
-    count: int
-
-
-class Lines(SQLModel):
-    lines: List[Line] = Field(
-        sa_column=Column(JSON, nullable=False, default={}), description="JSON data describing the lines."
-    )
+class Lines(BaseModel):
+    lines: List[Line] = Field(description="JSON data describing the lines.")
 
 
 class LinesBase(Lines):
     # columns
-    id: Optional[int] = Field(
-        default=None,
-        primary_key=True,
-        nullable=False,
-        description="Auto-incremented identifier of single lines definition.",
-    )
+    id: Optional[int] = Field(default=None, description="Auto-incremented identifier of single lines definition.")
     # relationships
-    task_id: int = Field(
-        foreign_key="task.id", nullable=False, description="Reference to the task the lines belong to."
-    )
+    task_id: int = Field(description="Reference to the task the lines belong to.")
 
     @classmethod
     def from_db_dict(cls, db_data):
@@ -53,5 +36,6 @@ class LinesBase(Lines):
         )
 
 
-class LinesModel(LinesBase, table=True):
-    __tablename__ = "lines"
+class LinesResponse(BaseModel):
+    names: List[str]
+    counts: List[List[int]]

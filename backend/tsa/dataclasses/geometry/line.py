@@ -1,3 +1,5 @@
+from typing import Sequence
+
 import numpy as np
 from shapely.geometry import LineString, Point
 
@@ -8,6 +10,10 @@ class Line(LineString):
 
         self.start_point = Point(coordinates[0])
         self.end_point = Point(coordinates[-1])
+
+    @classmethod
+    def from_points(cls, points: Sequence[Point]) -> "Line":
+        return cls([(point.x, point.y) for point in points])
 
     @property
     def coordinates(self):
