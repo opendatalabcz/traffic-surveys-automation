@@ -4,10 +4,10 @@ from pydantic import BaseModel, Field
 
 
 class Point(BaseModel):
-    x: float
-    y: float
+    x: int
+    y: int
 
-    def as_tuple(self) -> Tuple[float, float]:
+    def as_tuple(self) -> Tuple[int, int]:
         return self.x, self.y
 
 

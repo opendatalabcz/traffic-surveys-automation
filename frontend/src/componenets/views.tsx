@@ -30,7 +30,7 @@ export const LoadingView = () => (
 
 export const PointBadge = ({ point }: PointBadgeProps) => (
   <span className="badge bg-secondary">
-    [{point.x.toFixed(1)}, {point.y.toFixed(1)}]
+    [{point.x.toFixed(0)}, {point.y.toFixed(0)}]
   </span>
 );
 
