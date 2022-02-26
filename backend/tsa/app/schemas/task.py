@@ -53,10 +53,11 @@ class NewTask(BaseModel):
     detection_model: enums.DetectionModels
     tracking_model: enums.TrackingModel
     method: enums.TaskOutputMethod
-    parameters: Dict[str, Any]
+    parameters: Dict[str, str]
 
     @validator("parameters")
     def correct_parameters(cls, v: Dict[str, Any]):
         diff = set(v.keys()).difference(CONFIGURABLE_VARIABLES)
-        if not diff:
+        if diff:
             raise ValueError(f"Parameters contain unexpected variables: {', '.join(diff)}")
+        return v

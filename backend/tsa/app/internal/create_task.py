@@ -15,6 +15,7 @@ def _generate_output_path(source_path: str, method: enums.TaskOutputMethod) -> s
 
 async def create_task(task_repository: TaskRepository, new_task: NewTask, source_id: int, source_path: str) -> Task:
     task = Task(
+        name=new_task.name,
         models=[new_task.detection_model.value, new_task.tracking_model.value],
         output_method=new_task.method,
         output_path=_generate_output_path(source_path, new_task.method),
