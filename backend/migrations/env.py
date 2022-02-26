@@ -5,7 +5,7 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import AsyncEngine
 from tsa.app.database import create_database_dsn
-from tsa.app.schemas.base import SQLModel
+from tsa.app.schemas.base import metadata
 
 from alembic import context
 
@@ -19,7 +19,7 @@ fileConfig(config.config_file_name)
 
 # add your model's MetaData object here
 # for 'autogenerate' support
-target_metadata = SQLModel.metadata
+target_metadata = metadata
 
 # set sqlalchemy.url config value
 config.set_main_option("sqlalchemy.url", create_database_dsn())

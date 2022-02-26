@@ -1,9 +1,6 @@
 from typing import List, Optional, Tuple
 
-from pydantic import BaseModel
-from sqlmodel import Column, Field, JSON
-
-from .base import SQLModel
+from pydantic import BaseModel, Field
 
 
 class Point(BaseModel):
@@ -20,29 +17,15 @@ class Line(BaseModel):
     end: Point
 
 
-class LinesResponse(BaseModel):
-    names: List[str]
-    counts: List[List[int]]
-
-
-class Lines(SQLModel):
-    lines: List[Line] = Field(
-        sa_column=Column(JSON, nullable=False, default={}), description="JSON data describing the lines."
-    )
+class Lines(BaseModel):
+    lines: List[Line] = Field(description="JSON data describing the lines.")
 
 
 class LinesBase(Lines):
     # columns
-    id: Optional[int] = Field(
-        default=None,
-        primary_key=True,
-        nullable=False,
-        description="Auto-incremented identifier of single lines definition.",
-    )
+    id: Optional[int] = Field(default=None, description="Auto-incremented identifier of single lines definition.")
     # relationships
-    task_id: int = Field(
-        foreign_key="task.id", nullable=False, description="Reference to the task the lines belong to."
-    )
+    task_id: int = Field(description="Reference to the task the lines belong to.")
 
     @classmethod
     def from_db_dict(cls, db_data):
@@ -53,5 +36,6 @@ class LinesBase(Lines):
         )
 
 
-class LinesModel(LinesBase, table=True):
-    __tablename__ = "lines"
+class LinesResponse(BaseModel):
+    names: List[str]
+    counts: List[List[int]]
