@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { TaskClient } from './api/task';
+import { TaskConfiguration } from './types';
 
 type UseImageSizeReturn = {
   imageWidth?: number;
@@ -18,6 +20,18 @@ export const useImageSize = (imageRef: HTMLImageElement | null, width?: number):
       imageRelativeSize: width ? imageRef.naturalWidth / width : undefined,
     });
   }, [imageRef, width]);
+
+  return state;
+};
+
+export const useTaskConfiguration = () => {
+  const taskClient = new TaskClient();
+
+  const [state, setState] = useState<TaskConfiguration>({});
+
+  useEffect(() => {
+    taskClient.getConfiguration().then(config => setState(config));
+  }, []);
 
   return state;
 };

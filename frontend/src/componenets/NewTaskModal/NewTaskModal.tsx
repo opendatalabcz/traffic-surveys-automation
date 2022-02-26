@@ -1,92 +1,106 @@
-// import { Formik } from 'formik';
-// import { SourceFileProps } from '../../props';
+import { Form as FormikForm, Formik, useField } from 'formik';
+import Button from 'react-bootstrap/Button';
+import Form from 'react-bootstrap/Form';
+import InputGroup from 'react-bootstrap/InputGroup';
+import Modal from 'react-bootstrap/Modal';
+import { DetectionModel, OutputType, TrackingModel } from '../../enums';
+import { useTaskConfiguration } from '../../hooks';
+import { DetectionModelMapping, OutputTypeMapping, TrackingModelMapping } from '../../mappings';
+import { SourceFile } from '../../types';
+import { FormRow } from '../views';
 
-// const ModalHeader = (): JSX.Element => (
-//   <div className="modal-header">
-//     <h5 className="modal-title">Create new task</h5>
-//   </div>
-// );
-
-export type FormRowProps = {
-  title: string;
+type InitialValuesProps = {
   name: string;
-  content: JSX.Element;
+  outputMethod: string;
+  detectionModel: string;
+  trackingModel: string;
+  parameters: { [id: string]: string };
 };
 
-// const FormRow = ({ title, name, content }: FormRowProps): JSX.Element => (
-//   <div className="mb-3 form-floating">
-//     {content}
-//     <label htmlFor={name}>{title}</label>
-//   </div>
-// );
+type SourceFileProps = {
+  data?: SourceFile;
+  handleClose: () => void;
+  handleSave: (sourceFileId: number, values: InitialValuesProps) => void;
+};
 
-// export const NewTaskModal = ({ data }: SourceFileProps) => {
-//   const initialValues = {outputMethod: 'file', detectionModel: 'efficentdet_d6', trackingModel: 'simple_sort', parameters: {}};
+type ParametersPickerProps = {
+  onFieldChange: (fieldName: string, value: number) => void;
+};
 
-//   return (<div id="createNewTaskModal" className="modal fade" data-bs-backdrop="static" data-bs-keyboard="false">
-//     <div className="modal-dialog modal-lg">
-//       <div className="modal-content">
-//         <Formik
-//           initialValues={initialValues}
-//           validate={}
-//           onSubmit={}
-//         >
-//           {({
-//             values,
-//             errors,
-//             touched,
-//             handleChange,
-//             handleBlur,
-//             handleSubmit,
-//             isSubmitting,
-//             /* and other goodies */
-//           }) => (
-//             <form onSubmit={handleSubmit}>
-//               <ModalHeader />
+const ParametersPicker = ({ onFieldChange }: ParametersPickerProps) => {
+  const config = useTaskConfiguration();
+  const [field] = useField<{ [id: string]: string }>('parameters');
 
-//               <div className="modal-body">
-//                 <FormRow title="Output type" name=outputMethod">
-//                   <select className="form-select" id="formOutputType" name="output_method">
-//                     <option value="file">File</option>
-//                     <option value="video">Video</option>
-//                   </select>
-//                 </FormRow>
+  return (
+    <div className="border rounded px-2 py-2">
+      {Object.entries(config)
+        .sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0))
+        .map((value, index) => (
+          <InputGroup size="sm" className="mb-3" key={index}>
+            <InputGroup.Text className="col-5">{value[0]}</InputGroup.Text>
+            <Form.Control
+              type="number"
+              value={field.value[value[0]] ?? value[1] ?? undefined}
+              onChange={event => onFieldChange(value[0], event.target.value as unknown as number)}
+            />
+          </InputGroup>
+        ))}
+    </div>
+  );
+};
 
-//                 <div className="mb-3 form-floating">
-//                   <select className="form-select" id="formDetectionModel" name="detection_model">
-//                     <option value="efficientdet_d6">EfficientDet D6</option>
-//                     <option value="efficientdet_d5_adv_prop">EfficientDet D5 AdvProp</option>
-//                   </select>
-//                   <label htmlFor="formDetectionModel">Detection model</label>
-//                 </div>
+export const NewTaskModal = ({ data, handleClose, handleSave }: SourceFileProps) => {
+  const initialValues: InitialValuesProps = {
+    name: '',
+    outputMethod: OutputType.file.toString(),
+    detectionModel: DetectionModel.efficientdet_d6.toString(),
+    trackingModel: TrackingModel.simple_sort.toString(),
+    parameters: {},
+  };
 
-//                 <div className="mb-3 form-floating">
-//                   <select className="form-select" id="formTrackingModel" name="tracking_model">
-//                     <option value="simple_sort">Simple SORT</option>
-//                     <option value="deep_sort">Deep SORT</option>
-//                   </select>
-//                   <label htmlFor="formTrackingModel">Tracking model</label>
-//                 </div>
+  const generateOptions = (mapping: { [id: string]: string }) =>
+    Object.entries(mapping).map((value, index) => (
+      <option value={value[0]} key={index}>
+        {value[1]}
+      </option>
+    ));
 
-//                 <div className="mb-3 form-floating">
-//                   <input type="text" className="form-control" id="formParameters" name="parameters" value="{}" />
-//                   <label htmlFor="formParameters">Parameters</label>
-//                 </div>
-//               </div>
+  return (
+    <Formik initialValues={initialValues} onSubmit={values => handleSave(data!.id, values)}>
+      {({ handleSubmit, setFieldValue }) => (
+        <Modal show={data !== undefined} onHide={handleClose} backdrop="static" keyboard={false} size="lg">
+          <Modal.Header closeButton>
+            <Modal.Title>New task</Modal.Title>
+          </Modal.Header>
+          <FormikForm onSubmit={handleSubmit}>
+            <Modal.Body>
+              <FormRow title="Name" name="name" type="text"></FormRow>
 
-//               <div className="modal-footer">
-//                 <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">
-//                   Close
-//                 </button>
-//                 <button type="submit" className="btn btn-success">
-//                   Create
-//                 </button>
-//               </div>
-//             </form>
-//           )}
-//         </Formik>
-//       </div>
-//     </div>
-//   </div>
-// )
-// };
+              <FormRow title="Output method" name="outputMethod" as="select">
+                {generateOptions(OutputTypeMapping)}
+              </FormRow>
+
+              <FormRow title="Detection model" name="detectionModel" as="select">
+                {generateOptions(DetectionModelMapping)}
+              </FormRow>
+
+              <FormRow title="Tracking model" name="trackingModel" as="select">
+                {generateOptions(TrackingModelMapping)}
+              </FormRow>
+
+              <ParametersPicker onFieldChange={(field, value) => setFieldValue(`parameters.${field}`, value)} />
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={handleClose}>
+                Close
+              </Button>
+              <Button variant="success" type="submit">
+                Create
+              </Button>
+            </Modal.Footer>
+          </FormikForm>
+        </Modal>
+      )}
+    </Formik>
+  );
+};

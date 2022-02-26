@@ -1,8 +1,18 @@
 import { Link } from 'react-router-dom';
+import { Field } from 'formik';
+import Form from 'react-bootstrap/Form';
 import { Point } from '../types';
 
 type PointBadgeProps = {
   point: Point;
+};
+
+type FormRowProps = {
+  title: string;
+  name: string;
+  as?: string;
+  type?: string;
+  children?: JSX.Element[];
 };
 
 type TitleViewProps = {
@@ -22,6 +32,15 @@ export const PointBadge = ({ point }: PointBadgeProps) => (
   <span className="badge bg-secondary">
     [{point.x.toFixed(1)}, {point.y.toFixed(1)}]
   </span>
+);
+
+export const FormRow = (props: FormRowProps): JSX.Element => (
+  <Form.Group className="form-floating mb-3">
+    <Field type={props.type} as={props.as} name={props.name} className="form-select">
+      {props.children}
+    </Field>
+    <label htmlFor={props.name}>{props.title}</label>
+  </Form.Group>
 );
 
 export const TitleView = ({ title, backLink }: TitleViewProps) => {

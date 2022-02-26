@@ -43,6 +43,8 @@ export type Task = {
   output_path: string;
   status: TaskStatus;
   models: string[];
-  parameters: { [id: string]: string | number };
+  parameters: { [id: string]: number };
   lines: Lines[];
 };
+
+export type TaskConfiguration = { [id: string]: number | null };

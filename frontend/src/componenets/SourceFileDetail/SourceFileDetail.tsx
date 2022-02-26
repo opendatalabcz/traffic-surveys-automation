@@ -45,7 +45,7 @@ const Detail = ({ data }: DetailProps) => (
   <div>
     <div className="d-flex align-items-center">
       <span className="fs-4 fw-bold me-1">{data.name}</span>
-      <span className="fs-5 fw-light me-1">{data.path}</span>
+      <span className="fs-5 text-muted me-1">{data.path}</span>
       <span className={`fs-6 badge ${SourceFileTaskColorMapping[data.status]}`}>{data.status}</span>
     </div>
 

@@ -12,7 +12,7 @@ from .line import LinesBase
 class Task(SQLModel):
     # columns
     id: Optional[int] = Field(
-        default=None, primary_key=True, nullable=False, description="Aut-generated primary identifier of a task."
+        default=None, primary_key=True, nullable=False, description="Auto-generated primary identifier of a task."
     )
     name: str = Field(sa_column=Column(TEXT, nullable=False), description="Name of the task.")
     models: Tuple[str, ...] = Field(

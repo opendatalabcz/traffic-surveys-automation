@@ -10,7 +10,6 @@ from tsa.app.repositories.lines import LinesRepository
 from tsa.app.repositories.source_file import SourceFileRepository
 from tsa.app.repositories.task import TaskRepository
 from tsa.app.schemas import Lines, LinesBase, TaskWithLines
-from tsa.config import config
 
 router = APIRouter(prefix="/task", tags=["tasks"])
 
@@ -18,7 +17,7 @@ router = APIRouter(prefix="/task", tags=["tasks"])
 @router.get(
     "/configuration",
     description="Get the keys and default values of the default configuration.",
-    response_model=Dict[str, Union[Optional[int], Optional[float]]],
+    response_model=Dict[str, Union[Optional[float], Optional[int]]],
     status_code=status.HTTP_200_OK,
 )
 async def default_configuration():
