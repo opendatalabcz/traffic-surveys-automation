@@ -1,7 +1,10 @@
+from typing import Dict, Optional, Union
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from starlette.responses import StreamingResponse
 
 from tsa import enums
+from tsa.config import config, CONFIGURABLE_VARIABLES
 from tsa.app.internal.task_visualization import create_task_visualization
 from tsa.app.repositories.lines import LinesRepository
 from tsa.app.repositories.source_file import SourceFileRepository
@@ -10,6 +13,16 @@ from tsa.app.schemas import Lines, LinesBase, TaskWithLines
 from tsa.config import config
 
 router = APIRouter(prefix="/task", tags=["tasks"])
+
+
+@router.get(
+    "/configuration",
+    description="Get the keys and default values of the default configuration.",
+    response_model=Dict[str, Union[Optional[int], Optional[float]]],
+    status_code=status.HTTP_200_OK,
+)
+async def default_configuration():
+    return {c: config.__getattr__(c) for c in CONFIGURABLE_VARIABLES}
 
 
 @router.get(

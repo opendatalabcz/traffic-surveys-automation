@@ -63,7 +63,8 @@ async def run_task(task_id: int):
         source_file = await SourceFileRepository(connection).get_one(task.source_file_id)
 
     try:
-        await _run_task(task, source_file)
+        with config.override(**task.parameters):
+            await _run_task(task, source_file)
     except Exception as exc:
         await _change_db_statuses(source_file.id, task.id, enums.SourceFileStatus.processed, enums.TaskStatus.failed)
         raise exc
@@ -71,8 +72,6 @@ async def run_task(task_id: int):
 
 async def _run_task(task: Task, source_file: SourceFileBase):
     await _change_db_statuses(source_file.id, task.id, enums.SourceFileStatus.processing, enums.TaskStatus.processing)
-
-    config.extend_with_object(task.parameters)
 
     video_dataset = VideoFramesDataset(
         str(config.SOURCE_FILES_PATH / source_file.path), config.VIDEO_FRAME_RATE, config.VIDEO_MAX_FRAMES

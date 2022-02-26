@@ -1,16 +1,20 @@
 from typing import Any, Dict, List, Optional, Tuple
 
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 from sqlmodel import ARRAY, Column, Field, Enum, JSON, TEXT
 from tsa import enums
 
+from tsa.config import CONFIGURABLE_VARIABLES
 from .base import SQLModel
 from .line import LinesBase
 
 
 class Task(SQLModel):
     # columns
-    id: Optional[int] = Field(default=None, primary_key=True, description="Aut-generated primary identifier of a task.")
+    id: Optional[int] = Field(
+        default=None, primary_key=True, nullable=False, description="Aut-generated primary identifier of a task."
+    )
+    name: str = Field(sa_column=Column(TEXT, nullable=False), description="Name of the task.")
     models: Tuple[str, ...] = Field(
         sa_column=Column(ARRAY(TEXT), default=[], nullable=False),
         description="List of models to use when processing the task. Usually, it's one detector and one tracker.",
@@ -45,7 +49,14 @@ class TaskWithLines(Task):
 
 
 class NewTask(BaseModel):
+    name: str
     detection_model: enums.DetectionModels
     tracking_model: enums.TrackingModel
     method: enums.TaskOutputMethod
     parameters: Dict[str, Any]
+
+    @validator("parameters")
+    def correct_parameters(cls, v: Dict[str, Any]):
+        diff = set(v.keys()).difference(CONFIGURABLE_VARIABLES)
+        if not diff:
+            raise ValueError(f"Parameters contain unexpected variables: {', '.join(diff)}")
