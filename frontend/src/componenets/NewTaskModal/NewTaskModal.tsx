@@ -40,7 +40,7 @@ const ParametersPicker = ({ onFieldChange }: ParametersPickerProps) => {
             <InputGroup.Text className="col-5">{value[0]}</InputGroup.Text>
             <Form.Control
               type="number"
-              value={field.value[value[0]] ?? value[1] ?? undefined}
+              value={field.value[value[0]] ?? value[1] ?? 0}
               onChange={event => onFieldChange(value[0], event.target.value as unknown as number)}
             />
           </InputGroup>
@@ -51,7 +51,7 @@ const ParametersPicker = ({ onFieldChange }: ParametersPickerProps) => {
 
 export const NewTaskModal = ({ data, handleClose, handleSave }: SourceFileProps) => {
   const initialValues: InitialValuesProps = {
-    name: '',
+    name: data?.name ?? '',
     outputMethod: OutputType.file.toString(),
     detectionModel: DetectionModel.efficientdet_d6.toString(),
     trackingModel: TrackingModel.simple_sort.toString(),
@@ -66,7 +66,7 @@ export const NewTaskModal = ({ data, handleClose, handleSave }: SourceFileProps)
     ));
 
   return (
-    <Formik initialValues={initialValues} onSubmit={values => handleSave(data!.id, values)}>
+    <Formik initialValues={initialValues} enableReinitialize={true} onSubmit={values => handleSave(data!.id, values)}>
       {({ handleSubmit, setFieldValue }) => (
         <Modal show={data !== undefined} onHide={handleClose} backdrop="static" keyboard={false} size="lg">
           <Modal.Header closeButton>

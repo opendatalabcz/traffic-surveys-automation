@@ -15,6 +15,7 @@ export class SourceFileClient extends HttpClient {
 
   public createTask = (
     sourceFileId: number,
+    name: string,
     detectionModel: string,
     trackingModel: string,
     method: string,
@@ -22,6 +23,7 @@ export class SourceFileClient extends HttpClient {
   ) =>
     this.instance
       .post<Task>(`${sourceFileId}`, {
+        name: name,
         detection_model: detectionModel,
         tracking_model: trackingModel,
         method: method,

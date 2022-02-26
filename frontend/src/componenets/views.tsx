@@ -17,7 +17,7 @@ type FormRowProps = {
 
 type TitleViewProps = {
   title: string;
-  backLink: string;
+  backLink?: string;
 };
 
 export const LoadingView = () => (
@@ -36,7 +36,7 @@ export const PointBadge = ({ point }: PointBadgeProps) => (
 
 export const FormRow = (props: FormRowProps): JSX.Element => (
   <Form.Group className="form-floating mb-3">
-    <Field type={props.type} as={props.as} name={props.name} className="form-select">
+    <Field type={props.type} as={props.as} name={props.name} className={props.as ? 'form-select' : 'form-control'}>
       {props.children}
     </Field>
     <label htmlFor={props.name}>{props.title}</label>
@@ -46,9 +46,11 @@ export const FormRow = (props: FormRowProps): JSX.Element => (
 export const TitleView = ({ title, backLink }: TitleViewProps) => {
   return (
     <div className="d-flex align-items-center mb-3">
-      <Link to={backLink} className="fs-5 me-2">
-        <i className="bi bi-arrow-left-circle"></i>
-      </Link>
+      {backLink && (
+        <Link to={backLink} className="fs-5 me-2">
+          <i className="bi bi-arrow-left-circle"></i>
+        </Link>
+      )}
       <span className="fs-2">{title}</span>
     </div>
   );

@@ -8,8 +8,8 @@ import { Navigation } from './Navigation';
 
 const Header = () => {
   return (
-    <div id="header" className="row col-12 my-1">
-      <h2 className="col-6">Traffic Survey Automator</h2>
+    <div id="header" className="d-flex align-items-center row py-1">
+      <p className="col-6 justify-content-start display-6 my-0">Traffic Survey Automator</p>
 
       <div className="col-6 justify-content-end">
         <Navigation />

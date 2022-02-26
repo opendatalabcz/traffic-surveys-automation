@@ -1,10 +1,12 @@
 import { HttpClient } from './http-client';
-import { Line, Task } from '../types';
+import { Line, Task, TaskConfiguration } from '../types';
 
 export class TaskClient extends HttpClient {
   public constructor() {
     super('http://localhost:8000/task');
   }
+
+  public getConfiguration = () => this.instance.get<TaskConfiguration>('configuration').then(response => response.data);
 
   public getTask = (taskId: number) => this.instance.get<Task>(`${taskId}`).then(response => response.data);
 
