@@ -14,6 +14,7 @@ OUTPUT_FILES_PATH = env("OUTPUT_FILES_PATH", cast=Path)
 
 VIDEO_FRAME_RATE = env("VIDEO_FRAME_RATE", default=15, cast=int)
 VIDEO_MAX_FRAMES = env("VIDEO_MAX_FRAMES", default=None, cast=int)
+VIDEO_SHOW_CLASS = env("VIDEO_SHOW_CLASS", default=True, cast=bool)
 
 INTERPOLATION_POLYNOMIAL_DEGREE = env("INTERPOLATION_POLYNOMIAL_DEGREE", default=3, cast=int)
 

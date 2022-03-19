@@ -7,10 +7,11 @@ from .abstract import WriteStorageMethod
 
 
 class VideoStorageMethod(WriteStorageMethod):
-    def __init__(self, path: str, frame_rate: float, resolution: typing.IMAGE_SHAPE):
+    def __init__(self, path: str, frame_rate: float, resolution: typing.IMAGE_SHAPE, show_class: bool):
         self.output_video = cv2.VideoWriter(path, cv2.VideoWriter_fourcc(*"mp4v"), frame_rate, resolution)
         self.id_color_mapping = {}
         self.color_generator = np_utils.RandomGenerator(path)
+        self.show_class = show_class
 
     def save_frame(self, frame, detections, identifiers, classes, scores):
         for detection, identifier, class_, score in zip(detections, identifiers, classes, scores):
@@ -23,7 +24,7 @@ class VideoStorageMethod(WriteStorageMethod):
 
             cv2.rectangle(frame, (np_detection[0], np_detection[1]), (np_detection[2], np_detection[3]), color, 2, 1)
 
-            if class_ is not None:
+            if self.show_class and class_ is not None:
                 text = f"{class_}: {score}"
                 cv2.putText(frame, text, (np_detection[0], np_detection[1]), cv2.FONT_HERSHEY_PLAIN, 1, color)
 

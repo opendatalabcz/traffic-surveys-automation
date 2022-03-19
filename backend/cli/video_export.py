@@ -71,7 +71,9 @@ def export_to_video(
 
     processes.store_tracks(
         tracking_generator,
-        VideoStorageMethod(output_path, float(video_statistics.frame_rate), video_statistics.resolution),
+        VideoStorageMethod(
+            output_path, float(video_statistics.frame_rate), video_statistics.resolution, config.VIDEO_SHOW_CLASS
+        ),
     )
 
 

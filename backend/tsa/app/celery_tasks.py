@@ -89,6 +89,7 @@ async def _run_task(task: Task, source_file: SourceFileBase):
             str(config.OUTPUT_FILES_PATH / task.output_path),
             float(video_statistics.frame_rate),
             video_statistics.resolution,
+            config.VIDEO_SHOW_CLASS,
         ),
     )
 
