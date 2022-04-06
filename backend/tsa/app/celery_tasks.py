@@ -3,7 +3,7 @@ from tsa.config import config
 from tsa.datasets import VideoFramesDataset
 from tsa.models import abstract, detection, tracking
 from tsa.processes import run_detection_and_tracking, store_tracks
-from tsa.storage import VideoStorageMethod
+from tsa.storage import FileStorageMethod
 from tsa.app.celery import async_task
 from tsa.app.database import database_connection
 from tsa.app.repositories.source_file import SourceFileRepository
@@ -76,7 +76,6 @@ async def _run_task(task: Task, source_file: SourceFileBase):
     video_dataset = VideoFramesDataset(
         str(config.SOURCE_FILES_PATH / source_file.path), config.VIDEO_FRAME_RATE, config.VIDEO_MAX_FRAMES
     )
-    video_statistics = video_dataset.video_statistics
 
     prediction_model = _init_detection_model(enums.DetectionModels(task.models[0]))
     tracking_model = _init_tracking_model(enums.TrackingModel(task.models[1]))
@@ -85,12 +84,7 @@ async def _run_task(task: Task, source_file: SourceFileBase):
 
     store_tracks(
         tracking_generator,
-        VideoStorageMethod(
-            str(config.OUTPUT_FILES_PATH / task.output_path),
-            float(video_statistics.frame_rate),
-            video_statistics.resolution,
-            config.VIDEO_SHOW_CLASS,
-        ),
+        FileStorageMethod(config.OUTPUT_FILES_PATH / task.output_path),
     )
 
     await _change_db_statuses(source_file.id, task.id, enums.SourceFileStatus.processed, enums.TaskStatus.completed)

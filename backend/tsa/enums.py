@@ -23,8 +23,3 @@ class TaskStatus(Enum):
     processing = "processing"
     completed = "completed"
     failed = "failed"
-
-
-class TaskOutputMethod(Enum):
-    file = "file"
-    video = "video"

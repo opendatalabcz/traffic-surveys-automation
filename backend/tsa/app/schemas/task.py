@@ -18,7 +18,6 @@ class Task(BaseModel):
     models: Tuple[str, ...] = Field(
         description="List of models to use when processing the task. Usually, it's one detector and one tracker.",
     )
-    output_method: enums.TaskOutputMethod = Field(description="Method used for creating an output of the task.")
     output_path: str = Field(description="Output file generated as a result of a task.")
     parameters: Dict[str, Any] = Field(
         description="Parameters of the models. These override the default parameters of the app."
@@ -36,7 +35,6 @@ class NewTask(BaseModel):
     name: str
     detection_model: enums.DetectionModels
     tracking_model: enums.TrackingModel
-    method: enums.TaskOutputMethod
     parameters: PARAMETERS_TYPE
 
     @validator("parameters")

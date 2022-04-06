@@ -50,7 +50,7 @@ export const SourceFileList = (): JSX.Element => {
   };
 
   const discoverSourceFiles = () => {
-    sourceClient.discoverSourceFiles().then(data => setData(data));
+    sourceClient.discoverSourceFiles().then(newData => setData([...data, ...newData]));
   };
 
   useEffect(readSourceFiles, []);
@@ -90,14 +90,7 @@ export const SourceFileList = (): JSX.Element => {
         handleClose={() => setNewTaskSourceFile(undefined)}
         handleSave={(id, values) =>
           sourceClient
-            .createTask(
-              id,
-              values.name,
-              values.detectionModel,
-              values.trackingModel,
-              values.outputMethod,
-              values.parameters
-            )
+            .createTask(id, values.name, values.detectionModel, values.trackingModel, values.parameters)
             .then(() => setNewTaskSourceFile(undefined))
         }
       />

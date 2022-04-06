@@ -1,9 +1,4 @@
-import { DetectionModel, OutputType, SourceFileStatus, TrackingModel } from './enums';
-
-export const OutputTypeMapping = {
-  [OutputType.file.toString()]: 'File',
-  [OutputType.video.toString()]: 'Video',
-};
+import { DetectionModel, SourceFileStatus, TrackingModel } from './enums';
 
 export const DetectionModelMapping = {
   [DetectionModel.efficientdet_d6.toString()]: 'EfficientDet D6',

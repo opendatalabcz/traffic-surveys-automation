@@ -6,19 +6,16 @@ from tsa.app.repositories.task import TaskRepository
 from tsa.app.schemas.task import NewTask, Task
 
 
-def _generate_output_path(source_path: str, method: enums.TaskOutputMethod) -> str:
+def _generate_output_path(source_path: str) -> str:
     source_path_parts = source_path.rsplit(".", 1)
-    extension = "json" if method == enums.TaskOutputMethod.file else "mp4"
-
-    return f"{source_path_parts[0]}_{datetime.now().isoformat()}.{extension}"
+    return f"{source_path_parts[0]}_{datetime.now().isoformat()}.json"
 
 
 async def create_task(task_repository: TaskRepository, new_task: NewTask, source_id: int, source_path: str) -> Task:
     task = Task(
         name=new_task.name,
         models=[new_task.detection_model.value, new_task.tracking_model.value],
-        output_method=new_task.method,
-        output_path=_generate_output_path(source_path, new_task.method),
+        output_path=_generate_output_path(source_path),
         parameters=new_task.parameters,
         status=enums.TaskStatus.created,
         source_file_id=source_id,
