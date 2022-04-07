@@ -12,6 +12,9 @@ MODELS_PATH = env("MODELS_PATH", cast=Path)
 SOURCE_FILES_PATH = env("SOURCE_FILES_PATH", cast=Path)
 OUTPUT_FILES_PATH = env("OUTPUT_FILES_PATH", cast=Path)
 
+NEPTUNE_PROJECT = env("NEPTUNE_PROJECT", default="", cast=str)
+NEPTUNE_API_KEY = env("NEPTUNE_API_KEY", default="", cast=str)
+
 VIDEO_FRAME_RATE = env("VIDEO_FRAME_RATE", default=15, cast=int)
 VIDEO_MAX_FRAMES = env("VIDEO_MAX_FRAMES", default=None, cast=int)
 VIDEO_SHOW_CLASS = env("VIDEO_SHOW_CLASS", default=True, cast=bool)

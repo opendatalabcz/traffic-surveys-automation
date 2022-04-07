@@ -7,6 +7,7 @@ from tsa import enums, processes
 from tsa.config import config
 from tsa.dataclasses.frames import VideoFramesDataset
 from tsa.models import init_detection_model, init_tracking_model
+from tsa.monitoring import neptune_monitor
 from tsa.storage import FileStorageMethod
 
 
@@ -39,14 +40,17 @@ def export_to_file(
     if config_file is not None:
         config.extend_with_json(config_file)
 
-    dataset = VideoFramesDataset(dataset_path, config.VIDEO_FRAME_RATE, config.VIDEO_MAX_FRAMES)
+    with neptune_monitor(
+        "tsa-analysis", [detection_model_name.name, tracking_model_name.name, dataset_path.name, output_file.name]
+    ):
+        dataset = VideoFramesDataset(dataset_path, config.VIDEO_FRAME_RATE, config.VIDEO_MAX_FRAMES)
 
-    prediction_model = init_detection_model(detection_model_name)
-    tracking_model = init_tracking_model(tracking_model_name)
+        prediction_model = init_detection_model(detection_model_name)
+        tracking_model = init_tracking_model(tracking_model_name)
 
-    tracking_generator = processes.run_detection_and_tracking(dataset, prediction_model, tracking_model)
+        tracking_generator = processes.run_detection_and_tracking(dataset, prediction_model, tracking_model)
 
-    processes.store_tracks(tracking_generator, FileStorageMethod(output_file))
+        processes.store_tracks(tracking_generator, FileStorageMethod(output_file))
 
 
 if __name__ == "__main__":
