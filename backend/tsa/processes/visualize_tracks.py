@@ -1,10 +1,11 @@
+from pathlib import Path
 from typing import List, Optional
 
 import cv2
 import numpy as np
 from sklearn.cluster import KMeans
 
-from tsa.datasets import VideoFramesDataset
+from tsa.dataclasses.frames import VideoFramesDataset
 from tsa.storage import ReadStorageMethod
 from tsa.np_utils import RandomGenerator
 from tsa.dataclasses.track import FinalTrack
@@ -34,7 +35,7 @@ def create_tracks_visualization(
     return frame
 
 
-def video_or_empty_frame(dataset_path: Optional[str], resolution=(720, 1280)):
+def video_or_empty_frame(dataset_path: Optional[Path], resolution=(720, 1280)):
     if dataset_path:
         dataset = VideoFramesDataset(dataset_path)
         return next(dataset.frames)

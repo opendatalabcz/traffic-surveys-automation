@@ -4,6 +4,7 @@ from uuid import UUID
 import numpy as np
 
 from tsa import bbox
+from tsa.config import config
 from tsa.dataclasses.geometry import Curve
 
 
@@ -57,7 +58,7 @@ class FinalTrack(Track):
         self._path = data["path"]
         self._score_sum = data["score"] * self.count
 
-        self.curve = Curve(self.path, 3, 50)
+        self.curve = Curve(self.path, config.INTERPOLATION_POLYNOMIAL_DEGREE, 50)
 
     def bounding_box(self, frame: int):
         index = frame - self.frame_numbers[0]

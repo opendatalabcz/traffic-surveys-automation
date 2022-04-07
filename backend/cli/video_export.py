@@ -5,7 +5,7 @@ import click
 
 from tsa import processes
 from tsa.config import config
-from tsa.datasets import VideoFramesDataset
+from tsa.dataclasses.frames import VideoFramesDataset
 from tsa.storage import FileStorageMethod, VideoStorageMethod
 
 

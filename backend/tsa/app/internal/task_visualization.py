@@ -12,7 +12,7 @@ from tsa.storage.file import FileStorageMethod
 def create_task_visualization(
     task_file_path: str, frame_path: Optional[str], minimum_path_length: float, clusters: int
 ):
-    frame = video_or_empty_frame(frame_path)
+    frame = video_or_empty_frame(config.SOURCE_FILES_PATH / frame_path)
 
     image = create_tracks_visualization(
         frame,

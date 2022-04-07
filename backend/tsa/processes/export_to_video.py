@@ -1,7 +1,7 @@
 from collections import defaultdict
 from typing import Dict, List
 
-from tsa.datasets import FramesDataset
+from tsa.dataclasses.frames import FramesDataset
 from tsa.storage import ReadStorageMethod, WriteStorageMethod
 from tsa.dataclasses.track import FinalTrack
 

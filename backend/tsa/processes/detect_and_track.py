@@ -1,6 +1,6 @@
 import tensorflow as tf
 
-from tsa.datasets import FramesDataset
+from tsa.dataclasses.frames import FramesDataset
 from tsa.models.abstract import PredictableModel, TrackableModel
 
 

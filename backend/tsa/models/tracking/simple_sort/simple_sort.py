@@ -8,10 +8,10 @@ from typing import List, Tuple
 
 import numpy as np
 
-from tsa.models.tracking.common_sort import CommonSORT
 from tsa.models.tracking.tracker import Tracker
 from tsa.typing import MATCHED_IDS, NP_ARRAY
 
+from ..common_sort import CommonSORT
 from .association import associate_detections_to_trackers
 
 

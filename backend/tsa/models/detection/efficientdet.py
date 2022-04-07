@@ -5,8 +5,9 @@ import tensorflow as tf
 import tensorflow_hub as tf_hub
 
 from tsa.config import config
-from tsa.datasets import FramesDataset
-from tsa.models import PredictableModel
+from tsa.dataclasses.frames import FramesDataset
+
+from ..abstract import PredictableModel
 
 
 class EfficientDet(PredictableModel, ABC):

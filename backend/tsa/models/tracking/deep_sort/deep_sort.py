@@ -11,9 +11,9 @@ from typing import Tuple
 import numpy as np
 import tensorflow as tf
 
-from tsa.models.tracking.common_sort import CommonSORT
 from tsa.typing import MATCHED_IDS, NP_ARRAY
 
+from ..common_sort import CommonSORT
 from .deep_sort_raw import nn_matching
 from .deep_sort_raw.detection import Detection
 from .deep_sort_raw.tracker import Tracker

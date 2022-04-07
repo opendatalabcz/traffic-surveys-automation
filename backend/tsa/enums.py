@@ -1,12 +1,12 @@
 from enum import Enum
 
 
-class DetectionModels(Enum):
+class DetectionModels(str, Enum):
     efficientdet_d6 = "efficientdet_d6"
     efficientdet_d5_adv_prop = "efficientdet_d5_adv_prop"
 
 
-class TrackingModel(Enum):
+class TrackingModel(str, Enum):
     simple_sort = "simple_sort"
     deep_sort = "deep_sort"
 

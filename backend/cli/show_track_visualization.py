@@ -26,7 +26,7 @@ WINDOW_NAME = "Tracks visualization"
     required=False,
     help="Override the default configuration defined in tsa.config.*.config.json files.",
 )
-def visualize_tracks(tracks_file: Path, dataset_path: Optional[str], config_file: Optional[str] = None):
+def visualize_tracks(tracks_file: Path, dataset_path: Optional[Path], config_file: Optional[str] = None):
     if config_file is not None:
         config.extend_with_json(config_file)
 

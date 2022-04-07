@@ -3,17 +3,16 @@ from typing import Optional
 
 import click
 
-from tsa import processes
+from tsa import enums, processes
 from tsa.config import config
-from tsa.datasets import VideoFramesDataset
-from tsa.models.detection import EfficientDetD6
-from tsa.models.tracking import DeepSORT
+from tsa.dataclasses.frames import VideoFramesDataset
+from tsa.models import init_detection_model, init_tracking_model
 from tsa.storage import FileStorageMethod
 
 
 @click.command(help="Run the model and store outputs in a file.")
 @click.option(
-    "-d", "dataset_path", type=click.Path(exists=True, readable=True), required=True, help="Path to a video dataset."
+    "-p", "dataset_path", type=click.Path(exists=True, readable=True), required=True, help="Path to a video dataset."
 )
 @click.option(
     "-o",
@@ -22,6 +21,8 @@ from tsa.storage import FileStorageMethod
     required=True,
     help="Path where to store the output file.",
 )
+@click.option("-d", "detection_model_name", type=click.Choice(enums.DetectionModels), required=True)
+@click.option("-t", "tracking_model_name", type=click.Choice(enums.TrackingModel), required=True)
 @click.option(
     "--config-file",
     type=click.Path(exists=True),
@@ -29,28 +30,19 @@ from tsa.storage import FileStorageMethod
     help="Override the default configuration defined in tsa.config.*.config.json files.",
 )
 def export_to_file(
-    dataset_path: str,
+    dataset_path: Path,
     output_file: Path,
+    detection_model_name: enums.DetectionModels,
+    tracking_model_name: enums.TrackingModel,
     config_file: Optional[str] = None,
 ):
     if config_file is not None:
         config.extend_with_json(config_file)
 
     dataset = VideoFramesDataset(dataset_path, config.VIDEO_FRAME_RATE, config.VIDEO_MAX_FRAMES)
-    prediction_model = EfficientDetD6(
-        config.ED_MAX_OUTPUTS,
-        config.ED_IOU_THRESHOLD,
-        config.ED_SCORE_THRESHOLD,
-        config.ED_NSM_SIGMA,
-        config.ED_BATCH_SIZE,
-    )
-    tracking_model = DeepSORT(
-        config.DEEP_SORT_MIN_UPDATES,
-        config.DEEP_SORT_MAX_AGE,
-        config.DEEP_SORT_IOU_THRESHOLD,
-        config.DEEP_SORT_MAX_COSINE_DISTANCE,
-        config.DEEP_SORT_MAX_MEMORY_SIZE,
-    )
+
+    prediction_model = init_detection_model(detection_model_name)
+    tracking_model = init_tracking_model(tracking_model_name)
 
     tracking_generator = processes.run_detection_and_tracking(dataset, prediction_model, tracking_model)
 

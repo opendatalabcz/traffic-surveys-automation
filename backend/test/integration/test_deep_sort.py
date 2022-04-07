@@ -1,6 +1,6 @@
 import tensorflow as tf
 
-from tsa.datasets import VideoFramesDataset
+from tsa.dataclasses.frames import VideoFramesDataset
 from tsa.models.tracking import DeepSORT
 
 

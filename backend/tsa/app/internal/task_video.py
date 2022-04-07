@@ -2,7 +2,7 @@ from fastapi.responses import StreamingResponse
 
 from tsa import processes
 from tsa.config import config
-from tsa.datasets import VideoFramesDataset
+from tsa.dataclasses.frames import VideoFramesDataset
 from tsa.storage import FileStorageMethod, VideoStorageMethod
 
 
@@ -18,8 +18,8 @@ def create_video(source_video_path: str, analysis_path: str, output_frame_rate: 
         ),
     )
 
-    def iterate_file():
+    def generate_video():
         with open(config.OUTPUT_FILES_PATH / "tmp.mp4", "rb") as video_file:
             yield from video_file
 
-    return StreamingResponse(iterate_file(), media_type="video/mp4v")
+    return StreamingResponse(generate_video(), media_type="video/mp4")

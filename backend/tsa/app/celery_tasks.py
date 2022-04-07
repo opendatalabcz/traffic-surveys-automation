@@ -1,7 +1,7 @@
 from tsa import enums
 from tsa.config import config
-from tsa.datasets import VideoFramesDataset
-from tsa.models import abstract, detection, tracking
+from tsa.dataclasses.frames import VideoFramesDataset
+from tsa.models import init_detection_model, init_tracking_model
 from tsa.processes import run_detection_and_tracking, store_tracks
 from tsa.storage import FileStorageMethod
 from tsa.app.celery import async_task
@@ -9,43 +9,6 @@ from tsa.app.database import database_connection
 from tsa.app.repositories.source_file import SourceFileRepository
 from tsa.app.repositories.task import TaskRepository
 from tsa.app.schemas import SourceFileBase, Task
-
-DETECTION_MODEL_MAPPING = {
-    enums.DetectionModels.efficientdet_d5_adv_prop: detection.EfficientDetD5AdvPropAA,
-    enums.DetectionModels.efficientdet_d6: detection.EfficientDetD6,
-}
-
-TRACKING_MODEL_MAPPING = {
-    enums.TrackingModel.simple_sort: tracking.SimpleSORT,
-    enums.TrackingModel.deep_sort: tracking.DeepSORT,
-}
-
-
-def _init_detection_model(model_name: enums.DetectionModels) -> abstract.PredictableModel:
-    model = DETECTION_MODEL_MAPPING[model_name]
-    return model(
-        config.ED_MAX_OUTPUTS,
-        config.ED_IOU_THRESHOLD,
-        config.ED_SCORE_THRESHOLD,
-        config.ED_NSM_SIGMA,
-        config.ED_BATCH_SIZE,
-    )
-
-
-def _init_tracking_model(model_name: enums.TrackingModel) -> abstract.TrackableModel:
-    if model_name == enums.TrackingModel.deep_sort:
-        return tracking.DeepSORT(
-            config.DEEP_SORT_MIN_UPDATES,
-            config.DEEP_SORT_MAX_AGE,
-            config.DEEP_SORT_IOU_THRESHOLD,
-            config.DEEP_SORT_MAX_COSINE_DISTANCE,
-            config.DEEP_SORT_MAX_MEMORY_SIZE,
-        )
-    return tracking.SimpleSORT(
-        config.SORT_MIN_UPDATES,
-        config.SORT_MAX_AGE,
-        config.SORT_IOU_THRESHOLD,
-    )
 
 
 async def _change_db_statuses(
@@ -74,11 +37,11 @@ async def _run_task(task: Task, source_file: SourceFileBase):
     await _change_db_statuses(source_file.id, task.id, enums.SourceFileStatus.processing, enums.TaskStatus.processing)
 
     video_dataset = VideoFramesDataset(
-        str(config.SOURCE_FILES_PATH / source_file.path), config.VIDEO_FRAME_RATE, config.VIDEO_MAX_FRAMES
+        config.SOURCE_FILES_PATH / source_file.path, config.VIDEO_FRAME_RATE, config.VIDEO_MAX_FRAMES
     )
 
-    prediction_model = _init_detection_model(enums.DetectionModels(task.models[0]))
-    tracking_model = _init_tracking_model(enums.TrackingModel(task.models[1]))
+    prediction_model = init_detection_model(enums.DetectionModels(task.models[0]))
+    tracking_model = init_tracking_model(enums.TrackingModel(task.models[1]))
 
     tracking_generator = run_detection_and_tracking(video_dataset, prediction_model, tracking_model)
 
