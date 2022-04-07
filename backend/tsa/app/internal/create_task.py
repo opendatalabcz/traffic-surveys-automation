@@ -1,9 +1,15 @@
 from datetime import datetime
 
 from tsa import enums
-from tsa.app.celery_tasks import run_task
+from tsa.app.celery_tasks import run_task, schedule_task
 from tsa.app.repositories.task import TaskRepository
 from tsa.app.schemas.task import NewTask, Task
+from tsa.config import config
+
+CELERY_TASK_MAPPING = {
+    enums.CeleryTask.run.name: run_task,
+    enums.CeleryTask.schedule.name: schedule_task,
+}
 
 
 def _generate_output_path(source_path: str) -> str:
@@ -22,6 +28,7 @@ async def create_task(task_repository: TaskRepository, new_task: NewTask, source
     )
     saved_task = await task_repository.create(task)
 
-    run_task.s(task_id=saved_task.id).apply_async()
+    celery_task = CELERY_TASK_MAPPING[config.CELERY_TASK_TYPE]
+    celery_task.s(task_id=saved_task.id).apply_async()
 
     return saved_task

@@ -5,8 +5,7 @@ import cv2
 from starlette.responses import StreamingResponse
 
 from tsa.config import config
-from tsa.processes.visualize_tracks import (create_tracks_visualization,
-                                            video_or_empty_frame)
+from tsa.processes.visualize_tracks import create_tracks_visualization, video_or_empty_frame
 from tsa.storage.file import FileStorageMethod
 
 

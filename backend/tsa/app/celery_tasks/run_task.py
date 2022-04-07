@@ -1,8 +1,5 @@
 from tsa import enums
 from tsa.app.celery import async_task
-from tsa.app.database import database_connection
-from tsa.app.repositories.source_file import SourceFileRepository
-from tsa.app.repositories.task import TaskRepository
 from tsa.app.schemas import SourceFileBase, Task
 from tsa.config import config
 from tsa.dataclasses.frames import VideoFramesDataset
@@ -11,31 +8,23 @@ from tsa.monitoring import neptune_monitor
 from tsa.processes import run_detection_and_tracking, store_tracks
 from tsa.storage import FileStorageMethod
 
-
-async def _change_db_statuses(
-    source_file_id: int, task_id: int, source_file_status: enums.SourceFileStatus, task_status: enums.TaskStatus
-):
-    async with database_connection() as db:
-        await SourceFileRepository(db).update_state(source_file_id, source_file_status)
-        await TaskRepository(db).update_state(task_id, task_status)
+from .common import change_db_statuses, get_db_objects
 
 
 @async_task()
 async def run_task(task_id: int):
-    async with database_connection() as db:
-        task = await TaskRepository(db).get_one(task_id)
-        source_file = await SourceFileRepository(db).get_one(task.source_file_id)
+    task, source_file = await get_db_objects(task_id)
 
     try:
         with config.override(**task.parameters):
             await _run_task(task, source_file)
     except Exception as exc:
-        await _change_db_statuses(source_file.id, task.id, enums.SourceFileStatus.processed, enums.TaskStatus.failed)
+        await change_db_statuses(source_file.id, task.id, enums.SourceFileStatus.processed, enums.TaskStatus.failed)
         raise exc
 
 
 async def _run_task(task: Task, source_file: SourceFileBase):
-    await _change_db_statuses(source_file.id, task.id, enums.SourceFileStatus.processing, enums.TaskStatus.processing)
+    await change_db_statuses(source_file.id, task.id, enums.SourceFileStatus.processing, enums.TaskStatus.processing)
 
     with neptune_monitor(
         "tsa-analysis", [task.models[0], task.models[1], str(source_file.path), str(task.output_path)]
@@ -54,4 +43,4 @@ async def _run_task(task: Task, source_file: SourceFileBase):
             FileStorageMethod(config.OUTPUT_FILES_PATH / task.output_path),
         )
 
-    await _change_db_statuses(source_file.id, task.id, enums.SourceFileStatus.processed, enums.TaskStatus.completed)
+    await change_db_statuses(source_file.id, task.id, enums.SourceFileStatus.processed, enums.TaskStatus.completed)

@@ -2,10 +2,11 @@ from pathlib import Path
 
 from konfetti import env
 
-DATABASE_URL = env("DATABASE_URL")
-DATABASE_NAME = env("DATABASE_NAME")
+DB_URL = env("DATABASE_URL")
+DB_NAME = env("DATABASE_NAME")
 
 CELERY_BROKER = env("CELERY_BROKER", default="redis://localhost:6379/1")
+CELERY_TASK_TYPE = env("CELERY_TASK_TYPE", default="run", cast=str)
 
 MODELS_PATH = env("MODELS_PATH", cast=Path)
 
