@@ -1,14 +1,14 @@
 from tsa import enums
-from tsa.config import config
-from tsa.dataclasses.frames import VideoFramesDataset
-from tsa.models import init_detection_model, init_tracking_model
-from tsa.processes import run_detection_and_tracking, store_tracks
-from tsa.storage import FileStorageMethod
 from tsa.app.celery import async_task
 from tsa.app.database import database_connection
 from tsa.app.repositories.source_file import SourceFileRepository
 from tsa.app.repositories.task import TaskRepository
 from tsa.app.schemas import SourceFileBase, Task
+from tsa.config import config
+from tsa.dataclasses.frames import VideoFramesDataset
+from tsa.models import init_detection_model, init_tracking_model
+from tsa.processes import run_detection_and_tracking, store_tracks
+from tsa.storage import FileStorageMethod
 
 
 async def _change_db_statuses(

@@ -1,4 +1,5 @@
-from sqlalchemy import ARRAY, Column, Enum, ForeignKey, Integer, JSON, MetaData, Table, TEXT
+from sqlalchemy import (ARRAY, JSON, TEXT, Column, Enum, ForeignKey, Integer,
+                        MetaData, Table)
 
 from tsa import enums
 

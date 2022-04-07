@@ -3,7 +3,7 @@ from typing import Callable, Generic, List, TypeVar
 from databases import Database
 from fastapi import Depends
 from pydantic import BaseModel
-from sqlalchemy import and_, delete, insert, select, Table, update
+from sqlalchemy import Table, and_, delete, insert, select, update
 
 from tsa.app.database import get_db_connection
 from tsa.app.exceptions import NotFoundError

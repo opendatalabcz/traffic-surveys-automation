@@ -1,9 +1,10 @@
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pydantic import BaseModel, Field, validator
-from tsa import enums
 
+from tsa import enums
 from tsa.config import CONFIGURABLE_VARIABLES
+
 from .line import LinesBase
 
 PARAMETERS_TYPE = Dict[str, Union[float, int]]

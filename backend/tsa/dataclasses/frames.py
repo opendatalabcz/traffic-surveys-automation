@@ -8,7 +8,6 @@ import tensorflow as tf
 from tsa import typing
 from tsa.cv2.video_capture import VideoCapture
 
-
 VideoStatistics = namedtuple("VideoStatistics", ("frame_rate", "resolution"))
 
 

@@ -6,7 +6,6 @@ import numpy as np
 from tsa import typing
 from tsa.np_utils import diagonal
 
-
 KalmanFilterStaticMatrices = namedtuple(
     "KalmanFilterStaticMatrices",
     ["measurement_matrix", "measurement_noise_cov", "transition_matrix", "process_noise_cov"],

@@ -1,4 +1,4 @@
-from typing import Generator, Tuple, TypeVar, List, Optional
+from typing import Generator, List, Optional, Tuple, TypeVar
 
 import numpy as np
 from numpy import typing as npt

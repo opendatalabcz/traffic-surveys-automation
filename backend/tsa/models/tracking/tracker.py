@@ -4,7 +4,7 @@ from uuid import uuid4
 import numpy as np
 from scipy.linalg import solve_triangular
 
-from tsa import typing, bbox
+from tsa import bbox, typing
 from tsa.cv2.kalman_filter import KalmanFilter
 
 

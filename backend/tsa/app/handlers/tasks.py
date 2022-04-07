@@ -4,7 +4,6 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from starlette.responses import StreamingResponse
 
 from tsa import enums
-from tsa.config import config, CONFIGURABLE_VARIABLES
 from tsa.app.disk_manager import DiskManager
 from tsa.app.internal.task_video import create_video
 from tsa.app.internal.task_visualization import create_task_visualization
@@ -12,6 +11,7 @@ from tsa.app.repositories.lines import LinesRepository
 from tsa.app.repositories.source_file import SourceFileRepository
 from tsa.app.repositories.task import TaskRepository
 from tsa.app.schemas import Lines, LinesBase, TaskWithLines
+from tsa.config import CONFIGURABLE_VARIABLES, config
 
 router = APIRouter(prefix="/task", tags=["tasks"])
 

@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Dict, Generator
 
 import simplejson
+
 from tsa.dataclasses.track import FinalTrack, Track
 
 from .abstract import ReadStorageMethod, WriteStorageMethod

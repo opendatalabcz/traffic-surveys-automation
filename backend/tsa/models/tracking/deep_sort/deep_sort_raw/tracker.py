@@ -4,8 +4,7 @@ import numpy as np
 
 from tsa.models.tracking.tracker import DeepTracker as Track
 
-from . import linear_assignment
-from . import iou_matching
+from . import iou_matching, linear_assignment
 from .detection import Detection
 
 

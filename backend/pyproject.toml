@@ -38,6 +38,7 @@ mypy = "^0.930"
 pylint = "^2.12.2"
 pytest = "^6.2.5"
 poethepoet = "^0.11.0"
+isort = "^5.10.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -45,6 +46,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poe.tasks]
 black = "black -l 120 -t py39 tsa/ cli/"
+sort = "isort cli/ migrations/ test/ tsa/"
 test = "pytest test/"
 run = "uvicorn tsa.app.app:fast_app --reload"
 worker = "celery -A tsa.app.celery:celery_app worker -c 1"

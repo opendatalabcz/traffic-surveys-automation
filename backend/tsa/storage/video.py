@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import cv2
+
 from tsa import np_utils, typing
 
 from .abstract import WriteStorageMethod

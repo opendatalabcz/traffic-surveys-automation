@@ -6,9 +6,9 @@ import numpy as np
 from sklearn.cluster import KMeans
 
 from tsa.dataclasses.frames import VideoFramesDataset
-from tsa.storage import ReadStorageMethod
-from tsa.np_utils import RandomGenerator
 from tsa.dataclasses.track import FinalTrack
+from tsa.np_utils import RandomGenerator
+from tsa.storage import ReadStorageMethod
 
 
 def _cluster_tracks(tracks: List[FinalTrack], n_clusters: int) -> List[int]:
