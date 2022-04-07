@@ -1,5 +1,5 @@
-from operator import itemgetter
-from typing import List
+from itertools import tee
+from typing import Iterable, List, Tuple
 
 import numpy as np
 
@@ -7,17 +7,18 @@ from tsa.dataclasses.geometry.line import Line
 from tsa.storage import ReadStorageMethod
 
 
+def _pairwise(iterable: Iterable) -> Iterable[Tuple]:
+    first, second = tee(iterable)
+    next(second, None)
+    return zip(first, second)
+
+
 def _order_intersection_indices(track, intersections):
-    if len(intersections) == 2:
-        if track.curve.angle(Line([intersections[0][1], intersections[1][1]])) <= 90.0:
-            return tuple(map(itemgetter(0), intersections))
+    intersection_distances = [track.curve.project(intersection) for _, intersection in intersections]
+    sorted_intersection_distance_indices = sorted(range(len(intersections)), key=lambda i: intersection_distances[i])
+    sorted_intersection_indices = map(lambda i: intersections[i][0], sorted_intersection_distance_indices)
 
-        return tuple(map(itemgetter(0), reversed(intersections)))
-
-    if len(intersections) == 1:
-        return intersections[0][0], -1
-
-    return None
+    return _pairwise(sorted_intersection_indices)
 
 
 def count_vehicles(track_source: ReadStorageMethod, count_lines: List[Line]):
@@ -36,7 +37,10 @@ def count_vehicles(track_source: ReadStorageMethod, count_lines: List[Line]):
         if not intersections:
             continue
 
-        from_index, to_index = _order_intersection_indices(track, intersections)
-        counts[from_index, to_index] += 1
+        if len(intersections) == 1:
+            counts[intersections[0][0], -1] += 1
+        else:
+            for from_index, to_index in _order_intersection_indices(track, intersections):
+                counts[from_index, to_index] += 1
 
     return counts
