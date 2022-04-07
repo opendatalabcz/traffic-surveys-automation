@@ -1,9 +1,8 @@
 from collections import defaultdict
 from typing import Dict, List
 
-from tsa import typing
 from tsa.datasets import FramesDataset
-from tsa.storage import ReadStorageMethod, WriteStorageMethod, FrameStorageMethod
+from tsa.storage import ReadStorageMethod, WriteStorageMethod
 from tsa.dataclasses.track import FinalTrack
 
 
@@ -45,15 +44,3 @@ def export_to_video(
         video_destination.save_frame(frame, *_tracks_to_data(tracks_in_frame, i))
 
     video_destination.close()
-
-
-def yield_video(
-    video: FramesDataset, track_source: ReadStorageMethod, video_destination: FrameStorageMethod
-) -> typing.FRAME_GENERATOR:
-    frame_track_mapping = _build_mapping(track_source)
-
-    for i, frame in enumerate(video.frames):
-        tracks_in_frame = frame_track_mapping.get(i)
-
-        if tracks_in_frame is not None:
-            yield from video_destination.draw_objects(frame, *_tracks_to_data(tracks_in_frame, i))

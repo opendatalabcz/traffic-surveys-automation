@@ -1,15 +1,17 @@
-import cv2
+from pathlib import Path
 
+import cv2
 from tsa import np_utils, typing
 
-from .abstract import FrameStorageMethod, WriteStorageMethod
+from .abstract import WriteStorageMethod
 
 
-class FrameDrawMethod(FrameStorageMethod):
-    def __init__(self, color_generator_seed: str, show_class: bool):
+class VideoStorageMethod(WriteStorageMethod):
+    def __init__(self, path: Path, frame_rate: float, resolution: typing.IMAGE_SHAPE, show_class: bool):
         self.show_class = show_class
         self.id_color_mapping = {}
-        self.color_generator = np_utils.RandomGenerator(color_generator_seed)
+        self.color_generator = np_utils.RandomGenerator(str(path))
+        self.output_video = cv2.VideoWriter(str(path), cv2.VideoWriter_fourcc(*"mp4v"), frame_rate, resolution)
 
     def draw_objects(self, frame, detections, identifiers, classes, scores):
         for detection, identifier, class_, score in zip(detections, identifiers, classes, scores):
@@ -27,15 +29,8 @@ class FrameDrawMethod(FrameStorageMethod):
 
         return frame
 
-
-class VideoStorageMethod(WriteStorageMethod, FrameDrawMethod):
-    def __init__(self, path: str, frame_rate: float, resolution: typing.IMAGE_SHAPE, show_class: bool):
-        super().__init__(path, show_class)
-        self.output_video = cv2.VideoWriter(path, cv2.VideoWriter_fourcc(*"mp4v"), frame_rate, resolution)
-
     def save_frame(self, frame, detections, identifiers, classes, scores):
         frame_with_objects = self.draw_objects(frame, detections, identifiers, classes, scores)
-
         self.output_video.write(frame_with_objects)
 
     def close(self):

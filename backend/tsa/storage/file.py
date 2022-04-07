@@ -1,4 +1,5 @@
 from contextlib import contextmanager
+from pathlib import Path
 from typing import Dict, Generator
 
 import simplejson
@@ -8,7 +9,7 @@ from .abstract import ReadStorageMethod, WriteStorageMethod
 
 
 class FileStorageMethod(ReadStorageMethod, WriteStorageMethod):
-    def __init__(self, path: str):
+    def __init__(self, path: Path):
         self.frame_counter = 0
         self.output_file_path = path
         self.tracks: Dict[str, Track] = {}

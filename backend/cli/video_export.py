@@ -36,9 +36,9 @@ from tsa.storage import FileStorageMethod, VideoStorageMethod
     help="Override the default configuration defined in tsa.config.*.config.json files.",
 )
 def export_to_video(
-    dataset_path: str,
+    dataset_path: Path,
     tracks_file: Path,
-    output_path: str,
+    output_path: Path,
     output_frame_rate: Optional[int] = None,
     config_file: Optional[str] = None,
 ):

@@ -1,14 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Generator
 
-from tsa import typing
 from tsa.dataclasses.track import FinalTrack
-
-
-class FrameStorageMethod(ABC):
-    @abstractmethod
-    def draw_objects(self, frame, detections, identifiers, classes, scores) -> typing.NP_FRAME:
-        ...
 
 
 class WriteStorageMethod(ABC):

@@ -1,5 +1,6 @@
 from abc import abstractmethod
 from collections import namedtuple
+from pathlib import Path
 from typing import Generator, Optional
 
 import tensorflow as tf
@@ -44,7 +45,7 @@ class FramesDataset:
 
 class VideoFramesDataset(FramesDataset):
     def __init__(
-        self, file_path: str, output_frame_rate: Optional[int] = None, max_yielded_frames: Optional[int] = None
+        self, file_path: Path, output_frame_rate: Optional[int] = None, max_yielded_frames: Optional[int] = None
     ):
         """Initialize a dataset of video frames.
 
@@ -52,7 +53,7 @@ class VideoFramesDataset(FramesDataset):
         @param output_frame_rate FPS of the yielded frames, FPS not changed if not provided
         @param max_yielded_frames maximum number of yielded frames
         """
-        self.file_path = file_path
+        self.file_path = str(file_path)
         self.max_frames = max_yielded_frames
         self.output_frame_rate = output_frame_rate
 
