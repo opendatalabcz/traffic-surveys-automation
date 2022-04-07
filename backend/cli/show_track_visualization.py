@@ -7,7 +7,7 @@ import cv2
 from tsa import processes
 from tsa.config import config
 from tsa.cv2.line_draw import LineDrawer
-from tsa.datasets import VideoFramesDataset
+from tsa.processes.visualize_tracks import video_or_empty_frame
 from tsa.storage import FileStorageMethod
 
 WINDOW_NAME = "Tracks visualization"
@@ -15,10 +15,10 @@ WINDOW_NAME = "Tracks visualization"
 
 @click.command(help="Display tracks visualization.")
 @click.option(
-    "-d", "dataset_path", type=click.Path(exists=True, readable=True), required=True, help="Path to a video dataset."
+    "-f", "tracks_file", type=click.Path(exists=True, readable=True), required=True, help="Path with vehicle tracks."
 )
 @click.option(
-    "-f", "tracks_file", type=click.Path(exists=True, readable=True), required=True, help="Path with vehicle tracks."
+    "-d", "dataset_path", type=click.Path(exists=True, readable=True), required=False, help="Path to a video dataset."
 )
 @click.option(
     "--config-file",
@@ -26,12 +26,11 @@ WINDOW_NAME = "Tracks visualization"
     required=False,
     help="Override the default configuration defined in tsa.config.*.config.json files.",
 )
-def visualize_tracks(dataset_path: str, tracks_file: Path, config_file: Optional[str] = None):
+def visualize_tracks(tracks_file: Path, dataset_path: Optional[str], config_file: Optional[str] = None):
     if config_file is not None:
         config.extend_with_json(config_file)
 
-    dataset = VideoFramesDataset(dataset_path)
-    frame = next(dataset.frames)
+    frame = video_or_empty_frame(dataset_path)
 
     file_storage = FileStorageMethod(tracks_file)
 

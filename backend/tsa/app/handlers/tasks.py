@@ -5,6 +5,8 @@ from starlette.responses import StreamingResponse
 
 from tsa import enums
 from tsa.config import config, CONFIGURABLE_VARIABLES
+from tsa.app.disk_manager import DiskManager
+from tsa.app.internal.task_video import create_video
 from tsa.app.internal.task_visualization import create_task_visualization
 from tsa.app.repositories.lines import LinesRepository
 from tsa.app.repositories.source_file import SourceFileRepository
@@ -59,19 +61,54 @@ async def visualization(
     clusters: int = config.VISUALIZATION_N_CLUSTERS,
     source_file_repository: SourceFileRepository = Depends(SourceFileRepository),
     task_repository: TaskRepository = Depends(TaskRepository),
+    disk_manager: DiskManager = Depends(DiskManager),
 ):
     task = await task_repository.get_one(task_id)
     source_file = await source_file_repository.get_one(task.source_file_id)
 
-    if task.output_method != enums.TaskOutputMethod.file:
-        raise HTTPException(
-            status.HTTP_400_BAD_REQUEST, f"Task is of type {task.output_method.value}. File is expected."
-        )
+    if task.status != enums.TaskStatus.completed:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, f"Task is not completed yet. Status is {task.status.value}.")
+
+    return create_task_visualization(
+        task.output_path,
+        source_file.path if disk_manager.exists_in_source_files_folder(source_file.path) else None,
+        minimum_path_length,
+        clusters,
+    )
+
+
+@router.get(
+    "/{task_id}/video",
+    description="Generate a video export of the processed task.",
+    responses={
+        status.HTTP_400_BAD_REQUEST: {"description": "The task is invalid for visualization."},
+        status.HTTP_404_NOT_FOUND: {"description": "The task does not exist."},
+    },
+    response_class=StreamingResponse,
+    response_description="Streaming response of the MP4 data.",
+    status_code=status.HTTP_200_OK,
+)
+async def video(
+    task_id: int,
+    source_file_repository: SourceFileRepository = Depends(SourceFileRepository),
+    task_repository: TaskRepository = Depends(TaskRepository),
+    disk_manager: DiskManager = Depends(DiskManager),
+):
+    task = await task_repository.get_one(task_id)
+    source_file = await source_file_repository.get_one(task.source_file_id)
 
     if task.status != enums.TaskStatus.completed:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, f"Task is not completed yet. Status is {task.status.value}.")
 
-    return create_task_visualization(source_file.path, task.output_path, minimum_path_length, clusters)
+    if not disk_manager.exists_in_source_files_folder(source_file.path):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Original video file does not exist.")
+
+    return create_video(
+        source_file.path,
+        task.output_path,
+        task.parameters.get("VIDEO_FRAME_RATE", config.VIDEO_FRAME_RATE),
+        task.parameters.get("VIDEO_SHOW_CLASS", config.VIDEO_SHOW_CLASS),
+    )
 
 
 @router.post(

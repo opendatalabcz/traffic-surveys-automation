@@ -1,5 +1,12 @@
-from .abstract import ReadStorageMethod, WriteStorageMethod
+from .abstract import FrameStorageMethod, ReadStorageMethod, WriteStorageMethod
 from .file import FileStorageMethod
-from .video import VideoStorageMethod
+from .video import FrameDrawMethod, VideoStorageMethod
 
-__all__ = ["ReadStorageMethod", "WriteStorageMethod", "FileStorageMethod", "VideoStorageMethod"]
+__all__ = [
+    "ReadStorageMethod",
+    "WriteStorageMethod",
+    "FrameStorageMethod",
+    "FileStorageMethod",
+    "VideoStorageMethod",
+    "FrameDrawMethod",
+]

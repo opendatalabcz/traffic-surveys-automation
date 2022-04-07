@@ -1,4 +1,4 @@
-from typing import Tuple, TypeVar, List, Optional
+from typing import Generator, Tuple, TypeVar, List, Optional
 
 import numpy as np
 from numpy import typing as npt
@@ -15,3 +15,6 @@ BBOX_COORDINATES = TypeVar("BBOX_COORDINATES")  # BBOX in form (top_left_x, top_
 BBOX_CENTER = TypeVar("BBOX_CENTER")  # BBOX in form (center_x, center_y, ratio, height)
 MATCHED_BBOXES = NP_ARRAY
 MATCHED_IDS = List[Optional[str]]
+
+# objects
+FRAME_GENERATOR = Generator[NP_FRAME, None, None]

@@ -1,9 +1,10 @@
-from typing import List
+from typing import List, Optional
 
 import cv2
 import numpy as np
 from sklearn.cluster import KMeans
 
+from tsa.datasets import VideoFramesDataset
 from tsa.storage import ReadStorageMethod
 from tsa.np_utils import RandomGenerator
 from tsa.dataclasses.track import FinalTrack
@@ -31,3 +32,11 @@ def create_tracks_visualization(
         cv2.polylines(frame, [track.curve.coordinates.astype(np.int32)], False, colors[cluster], 1, cv2.LINE_AA)
 
     return frame
+
+
+def video_or_empty_frame(dataset_path: Optional[str], resolution=(720, 1280)):
+    if dataset_path:
+        dataset = VideoFramesDataset(dataset_path)
+        return next(dataset.frames)
+
+    return np.zeros(resolution, dtype=np.uint8)
