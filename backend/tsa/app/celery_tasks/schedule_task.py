@@ -29,7 +29,7 @@ def _generate_config_file(task: Task):
 
 
 def _generate_sbatch_file(source_file, task: Task, config_file_name: str):
-    sbatch_file_name = f"sbatch_{task.id}"
+    sbatch_file_name = f"sbatch_configs/sbatch_{task.id}"
 
     with open(sbatch_file_name, "w", encoding="utf-8") as sbatch_file:
         sbatch_file.writelines(

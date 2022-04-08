@@ -1,7 +1,9 @@
 from contextlib import contextmanager
+from datetime import datetime
 from typing import List, Optional
 
 import neptune.new as neptune
+import tensorflow as tf
 
 from tsa.config import config, config_to_dict
 
@@ -15,3 +17,11 @@ def neptune_monitor(name: Optional[str] = None, tags: Optional[List[str]] = None
         yield run
     finally:
         run.stop()
+
+
+def monitor_analysis(analysis_generator, monitor):
+    for batch in analysis_generator:
+        monitor["timestamp"].log(datetime.now())
+        monitor["count"].log(tf.shape(batch[1])[0])
+
+        yield batch

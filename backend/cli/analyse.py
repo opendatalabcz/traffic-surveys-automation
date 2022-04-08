@@ -9,7 +9,7 @@ from tsa.app.celery_tasks.common import change_db_statuses
 from tsa.config import config
 from tsa.dataclasses.frames import VideoFramesDataset
 from tsa.models import init_detection_model, init_tracking_model
-from tsa.monitoring import neptune_monitor
+from tsa.monitoring import monitor_analysis, neptune_monitor
 from tsa.storage import FileStorageMethod
 
 
@@ -63,13 +63,14 @@ def _run_analysis(
 ):
     with neptune_monitor(
         "tsa-analysis", [detection_model_name.name, tracking_model_name.name, dataset_path.name, output_file.name]
-    ):
+    ) as neptune:
         dataset = VideoFramesDataset(dataset_path, config.VIDEO_FRAME_RATE, config.VIDEO_MAX_FRAMES)
 
         prediction_model = init_detection_model(detection_model_name)
         tracking_model = init_tracking_model(tracking_model_name)
 
         tracking_generator = processes.run_detection_and_tracking(dataset, prediction_model, tracking_model)
+        tracking_generator = monitor_analysis(tracking_generator, neptune)
 
         processes.store_tracks(tracking_generator, FileStorageMethod(output_file))
 
