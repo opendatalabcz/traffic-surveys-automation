@@ -2,6 +2,7 @@ import tensorflow as tf
 
 from tsa.dataclasses.frames import FramesDataset
 from tsa.models.abstract import PredictableModel, TrackableModel
+from tsa.monitoring import Monitor
 
 
 def run_detection_and_tracking(
@@ -11,8 +12,11 @@ def run_detection_and_tracking(
 
     @return: generator of tuples numpy frame, detections in frame (None x 4), identifications, classes and scores
     """
-    for frames, batch_detections, batch_classes, batch_scores in detection_model.predict(dataset):
-        batch_tracking = tracking_model.track(batch_detections, frames=frames)
+    detection_function = Monitor.monitor_duration(detection_model.predict, "detection")
+    tracking_function = Monitor.monitor_duration(tracking_model.track, "tracking")
+
+    for frames, batch_detections, batch_classes, batch_scores in detection_function(dataset):
+        batch_tracking = tracking_function(batch_detections, frames=frames)
 
         for frame, detections, classes, scores, (tracks, identifiers, new_tracks) in zip(
             frames, batch_detections, batch_classes, batch_scores, batch_tracking

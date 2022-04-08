@@ -4,7 +4,7 @@ from tsa.app.schemas import SourceFileBase, Task
 from tsa.config import config
 from tsa.dataclasses.frames import VideoFramesDataset
 from tsa.models import init_detection_model, init_tracking_model
-from tsa.monitoring import neptune_monitor
+from tsa.monitoring import Monitor
 from tsa.processes import run_detection_and_tracking, store_tracks
 from tsa.storage import FileStorageMethod
 
@@ -26,7 +26,7 @@ async def run_task(task_id: int):
 async def _run_task(task: Task, source_file: SourceFileBase):
     await change_db_statuses(source_file.id, task.id, enums.SourceFileStatus.processing, enums.TaskStatus.processing)
 
-    with neptune_monitor(
+    with Monitor.neptune_monitor(
         "tsa-analysis", [task.models[0], task.models[1], str(source_file.path), str(task.output_path)]
     ):
         video_dataset = VideoFramesDataset(
