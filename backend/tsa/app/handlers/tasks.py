@@ -11,7 +11,7 @@ from tsa.app.repositories.lines import LinesRepository
 from tsa.app.repositories.source_file import SourceFileRepository
 from tsa.app.repositories.task import TaskRepository
 from tsa.app.schemas import Lines, LinesBase, TaskWithLines
-from tsa.config import CONFIGURABLE_VARIABLES, config
+from tsa.config import config, config_to_dict
 
 router = APIRouter(prefix="/task", tags=["tasks"])
 
@@ -23,7 +23,7 @@ router = APIRouter(prefix="/task", tags=["tasks"])
     status_code=status.HTTP_200_OK,
 )
 async def default_configuration():
-    return {c: config.__getattr__(c) for c in CONFIGURABLE_VARIABLES}
+    return config_to_dict()
 
 
 @router.get(

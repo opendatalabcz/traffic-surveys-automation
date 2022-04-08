@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Any, Dict
 
 from konfetti import Konfig
 
@@ -32,3 +33,7 @@ config = Konfig.from_object("tsa.config.base")
 config.extend_with_json(CONFIG_DIR / "efficientdet.config.json")
 config.extend_with_json(CONFIG_DIR / "sort.config.json")
 config.extend_with_json(CONFIG_DIR / "deep_sort.config.json")
+
+
+def config_to_dict() -> Dict[str, Any]:
+    return {c: config.__getattr__(c) for c in CONFIGURABLE_VARIABLES}
