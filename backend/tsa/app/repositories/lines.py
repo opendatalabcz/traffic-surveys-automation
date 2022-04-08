@@ -9,6 +9,7 @@ from .base import DatabaseRepository
 class LinesRepository(DatabaseRepository[LinesBase]):
     model = LineModel
     data_class = LinesBase
+    sort_keys = [LineModel.c.id]
 
     async def create(self, lines: Lines, *, task_id: int) -> LinesBase:
         return await super().create(lines, task_id=task_id)

@@ -35,8 +35,8 @@ from tsa.storage import FileStorageMethod
     help="Override the default configuration defined in tsa.config.*.config.json files.",
 )
 def run_analysis(
-    dataset_file: Path,
-    output_file: Path,
+    dataset_file: str,
+    output_file: str,
     detection_model_name: enums.DetectionModels,
     tracking_model_name: enums.TrackingModel,
     identifiers: Optional[Tuple[int, int]] = None,
@@ -47,7 +47,7 @@ def run_analysis(
 
     try:
         _change_db_statuses(identifiers, enums.SourceFileStatus.processing, enums.TaskStatus.processing)
-        _run_analysis(dataset_file, output_file, detection_model_name, tracking_model_name)
+        _run_analysis(Path(dataset_file), Path(output_file), detection_model_name, tracking_model_name)
     except Exception as exc:
         _change_db_statuses(identifiers, enums.SourceFileStatus.processed, enums.TaskStatus.failed)
         raise exc

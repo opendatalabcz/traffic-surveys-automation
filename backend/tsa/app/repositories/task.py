@@ -10,6 +10,7 @@ from .base import DatabaseRepository
 class TaskRepository(DatabaseRepository[Task]):
     model = TaskModel
     data_class = Task
+    sort_keys = [TaskModel.c.id]
 
     async def get_many(self, source_file_id: int) -> List[Task]:
         return await super().get_many(self.model.c.source_file_id == source_file_id)

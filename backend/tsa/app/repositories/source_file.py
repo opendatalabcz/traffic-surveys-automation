@@ -12,6 +12,7 @@ from .base import DatabaseRepository
 class SourceFileRepository(DatabaseRepository[SourceFileBase]):
     model = SourceFileModel
     data_class = SourceFileBase
+    sort_keys = [SourceFileModel.c.path]
 
     async def create(self, source_file: SourceFileBase, **_) -> Optional[SourceFileBase]:
         result_data = await self._connection.fetch_one(

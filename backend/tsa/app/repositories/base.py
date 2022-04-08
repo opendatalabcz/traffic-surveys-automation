@@ -15,6 +15,8 @@ class DatabaseRepository(Generic[K]):
     model: Table
     data_class: K
 
+    sort_keys: List = []
+
     def __init__(self, connection: Database = Depends(get_db_connection)):
         self._connection = connection
 
@@ -41,6 +43,8 @@ class DatabaseRepository(Generic[K]):
 
         if conditions:
             statement = statement.where(and_(*conditions))
+
+        statement = statement.order_by(*self.sort_keys)
 
         results = await self._connection.fetch_all(statement)
         return [self.data_class(**result) for result in results]
