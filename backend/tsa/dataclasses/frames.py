@@ -8,7 +8,7 @@ import tensorflow as tf
 from tsa import typing
 from tsa.cv2.video_capture import VideoCapture
 
-VideoStatistics = namedtuple("VideoStatistics", ("frame_rate", "resolution"))
+VideoStatistics = namedtuple("VideoStatistics", ("frame_rate", "resolution", "duration"))
 
 
 def get_frame_rate_for_video(video: VideoCapture, expected_frames: Optional[int]) -> int:
@@ -77,7 +77,7 @@ class VideoFramesDataset(FramesDataset):
             if frame_rate is None or video.frame_rate < frame_rate:
                 frame_rate = video.frame_rate
 
-            return VideoStatistics(frame_rate=frame_rate, resolution=video.resolution)
+            return VideoStatistics(frame_rate=frame_rate, resolution=video.resolution, duration=video.duration)
 
     def _stop(self, current_frame: int) -> bool:
         return self.max_frames is not None and current_frame >= self.max_frames

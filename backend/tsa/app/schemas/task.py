@@ -43,4 +43,5 @@ class NewTask(BaseModel):
         diff = set(v.keys()).difference(CONFIGURABLE_VARIABLES)
         if diff:
             raise ValueError(f"Parameters contain unexpected variables: {', '.join(diff)}")
-        return v
+        # cast the parameters to their correct types
+        return {key: CONFIGURABLE_VARIABLES[key][1](value) for key, value in v.items()}

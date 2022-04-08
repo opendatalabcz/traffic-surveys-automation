@@ -66,6 +66,8 @@ def _run_analysis(
     ) as neptune:
         dataset = VideoFramesDataset(dataset_path, config.VIDEO_FRAME_RATE, config.VIDEO_MAX_FRAMES)
 
+        neptune["video"] = dataset.video_statistics
+
         prediction_model = init_detection_model(detection_model_name)
         tracking_model = init_tracking_model(tracking_model_name)
 

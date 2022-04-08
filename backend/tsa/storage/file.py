@@ -4,6 +4,7 @@ from typing import Dict, Generator
 
 import simplejson
 
+from tsa.config import config
 from tsa.dataclasses.track import FinalTrack, Track
 
 from .abstract import ReadStorageMethod, WriteStorageMethod
@@ -29,7 +30,14 @@ class FileStorageMethod(ReadStorageMethod, WriteStorageMethod):
 
     def close(self):
         with self._open_output_path("w") as output_file:
-            simplejson.dump([track.as_dict() for track in self.tracks.values()], output_file)
+            simplejson.dump(
+                [
+                    track.as_dict()
+                    for track in self.tracks.values()
+                    if track.count >= config.INTERPOLATION_POLYNOMIAL_DEGREE + 1
+                ],
+                output_file,
+            )
 
     @property
     def track_name(self) -> str:
