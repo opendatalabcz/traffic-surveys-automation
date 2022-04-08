@@ -41,6 +41,9 @@ class SimpleSORT(CommonSORT):
 
         self._update_existing_trackers(matched, detections)
 
+        for tracker_position in unmatched_trackers:
+            self.current_trackers[tracker_position].mark_missed()
+
         self._delete_old_trackers()
 
         self._create_new_trackers(unmatched_detections, detections)
@@ -53,9 +56,7 @@ class SimpleSORT(CommonSORT):
             self.current_trackers.append(new_tracker)
 
     def _delete_old_trackers(self):
-        for i in reversed(range(len(self.current_trackers))):
-            if self.current_trackers[i].is_deleted:
-                self.current_trackers.pop(i)
+        self.current_trackers = [tracker for tracker in self.current_trackers if not tracker.is_deleted]
 
     def _predict_active_trackers(self):
         predictions = np.array([tracker.predict() for tracker in self.current_trackers])

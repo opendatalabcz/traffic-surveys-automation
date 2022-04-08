@@ -1,5 +1,4 @@
 from contextlib import contextmanager
-from datetime import datetime
 from typing import List, Optional
 
 import neptune.new as neptune
@@ -21,7 +20,7 @@ def neptune_monitor(name: Optional[str] = None, tags: Optional[List[str]] = None
 
 def monitor_analysis(analysis_generator, monitor):
     for batch in analysis_generator:
-        monitor["timestamp"].log(datetime.now())
-        monitor["count"].log(tf.shape(batch[1])[0])
+        monitor["count/frame"].log(1)
+        monitor["count/detections"].log(tf.shape(batch[1])[0])
 
         yield batch

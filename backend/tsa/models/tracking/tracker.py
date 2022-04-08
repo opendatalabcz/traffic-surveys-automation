@@ -52,6 +52,12 @@ class Tracker:
         bbox_prediction, _ = bbox.center_to_bbox(prediction)
         return bbox_prediction
 
+    def mark_missed(self):
+        if self._status == TrackerState.new:
+            self._status = TrackerState.deleted
+        elif self.time_since_update > self.max_time_since_update:
+            self._status = TrackerState.deleted
+
 
 class DeepTracker(Tracker):
     def __init__(self, initial_position: typing.BBOX_COORDINATES, min_updates: int, max_age: int, feature=None):
@@ -63,12 +69,6 @@ class DeepTracker(Tracker):
         super().update(new_position)
 
         self.features.append(feature)
-
-    def mark_missed(self):
-        if self._status == TrackerState.new:
-            self._status = TrackerState.deleted
-        elif self.time_since_update > self.max_time_since_update:
-            self._status = TrackerState.deleted
 
     def mahalanobis_distance(self, measurements, only_position=False):
         """Compute Mahalanobis distance between state distribution and measurements."""
