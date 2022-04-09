@@ -33,7 +33,7 @@ uvicorn = {extras = ["standard"], version = "^0.17.5"}
 neptune-client = "^0.15.2"
 
 [tool.poetry.dev-dependencies]
-black = "^21.12b0"
+black = "^22"
 jupyter = "^1.0.0"
 mypy = "^0.930"
 pylint = "^2.12.2"

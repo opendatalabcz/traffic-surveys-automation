@@ -57,8 +57,6 @@ async def get_task(
 )
 async def visualization(
     task_id: int,
-    minimum_path_length: int = config.VISUALIZATION_MIN_PATH_LENGTH,
-    clusters: int = config.VISUALIZATION_N_CLUSTERS,
     source_file_repository: SourceFileRepository = Depends(SourceFileRepository),
     task_repository: TaskRepository = Depends(TaskRepository),
     disk_manager: DiskManager = Depends(DiskManager),
@@ -72,8 +70,8 @@ async def visualization(
     return create_task_visualization(
         task.output_path,
         source_file.path if disk_manager.exists_in_source_files_folder(source_file.path) else None,
-        minimum_path_length,
-        clusters,
+        task.parameters.get("VISUALIZATION_MIN_PATH_LENGTH", config.VISUALIZATION_MIN_PATH_LENGTH),
+        task.parameters.get("VISUALIZATION_N_CLUSTERS", config.VISUALIZATION_N_CLUSTERS),
     )
 
 

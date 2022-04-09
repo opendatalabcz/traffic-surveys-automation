@@ -58,7 +58,7 @@ class FinalTrack(Track):
         self._path = data["path"]
         self._score_sum = data["score"] * self.count
 
-        self.curve = Curve(self.path, config.INTERPOLATION_POLYNOMIAL_DEGREE, 50)
+        self.curve = Curve(self.path, config.INTERPOLATION_POLYNOMIAL_DEGREE, self.count // 2)
 
     def bounding_box(self, frame: int):
         index = frame - self.frame_numbers[0]

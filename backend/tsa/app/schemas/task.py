@@ -40,8 +40,8 @@ class NewTask(BaseModel):
 
     @validator("parameters")
     def correct_parameters(cls, v: PARAMETERS_TYPE) -> PARAMETERS_TYPE:
-        diff = set(v.keys()).difference(CONFIGURABLE_VARIABLES)
+        diff = set(v.keys()).difference(set(CONFIGURABLE_VARIABLES.keys()))
         if diff:
             raise ValueError(f"Parameters contain unexpected variables: {', '.join(diff)}")
         # cast the parameters to their correct types
-        return {key: CONFIGURABLE_VARIABLES[key][1](value) for key, value in v.items()}
+        return {key: CONFIGURABLE_VARIABLES[key](value) for key, value in v.items()}

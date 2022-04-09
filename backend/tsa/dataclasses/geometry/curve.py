@@ -34,4 +34,4 @@ class Curve(Line):
     def __init__(self, coordinates: typing.NP_ARRAY, interpolation_degree: int, interpolation_detail: int):
         interpolation = LeastSquaresInterpolation(coordinates, interpolation_degree, 13)
 
-        super().__init__(interpolation.interpolating_points(interpolation_detail))
+        super().__init__(interpolation.interpolating_points(interpolation_detail, end=len(coordinates) - 1))
