@@ -6,7 +6,6 @@ import numpy as np
 from tsa import typing
 from tsa.np_utils import diagonal
 
-
 KalmanFilterStaticMatrices = namedtuple(
     "KalmanFilterStaticMatrices",
     ["measurement_matrix", "measurement_noise_cov", "transition_matrix", "process_noise_cov"],
@@ -81,11 +80,11 @@ class KalmanFilter:
 
         transition_matrix = np.eye(10, 10, dtype=np.float32)
         transition_matrix[0:4, 4:8] = np.eye(4, 4) * delta
-        transition_matrix[0:2, 8:10] = np.eye(2, 2) * 0.5 * delta ** 2
+        transition_matrix[0:2, 8:10] = np.eye(2, 2) * 0.5 * delta**2
 
-        process_noise_covariance = diagonal(delta ** 4 / 4, delta ** 2, 1, repeats=(4, 4, 2))
-        process_noise_covariance[0:4, 4:8] = process_noise_covariance[4:8, 0:4] = diagonal(delta ** 3 / 2, repeats=4)
-        process_noise_covariance[0:2, 8:10] = process_noise_covariance[8:10, 0:2] = diagonal(delta ** 2 / 2, repeats=2)
+        process_noise_covariance = diagonal(delta**4 / 4, delta**2, 1, repeats=(4, 4, 2))
+        process_noise_covariance[0:4, 4:8] = process_noise_covariance[4:8, 0:4] = diagonal(delta**3 / 2, repeats=4)
+        process_noise_covariance[0:2, 8:10] = process_noise_covariance[8:10, 0:2] = diagonal(delta**2 / 2, repeats=2)
         process_noise_covariance[4:6, 8:10] = process_noise_covariance[8:10, 4:6] = diagonal(delta, repeats=2)
 
         cls.static_matrices = KalmanFilterStaticMatrices(

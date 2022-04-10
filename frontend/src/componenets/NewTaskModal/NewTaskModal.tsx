@@ -3,15 +3,14 @@ import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
 import Modal from 'react-bootstrap/Modal';
-import { DetectionModel, OutputType, TrackingModel } from '../../enums';
+import { DetectionModel, TrackingModel } from '../../enums';
 import { useTaskConfiguration } from '../../hooks';
-import { DetectionModelMapping, OutputTypeMapping, TrackingModelMapping } from '../../mappings';
+import { DetectionModelMapping, TrackingModelMapping } from '../../mappings';
 import { SourceFile } from '../../types';
 import { FormRow } from '../views';
 
 type InitialValuesProps = {
   name: string;
-  outputMethod: string;
   detectionModel: string;
   trackingModel: string;
   parameters: { [id: string]: string };
@@ -52,7 +51,6 @@ const ParametersPicker = ({ onFieldChange }: ParametersPickerProps) => {
 export const NewTaskModal = ({ data, handleClose, handleSave }: SourceFileProps) => {
   const initialValues: InitialValuesProps = {
     name: data?.name ?? '',
-    outputMethod: OutputType.file.toString(),
     detectionModel: DetectionModel.efficientdet_d6.toString(),
     trackingModel: TrackingModel.simple_sort.toString(),
     parameters: {},
@@ -75,10 +73,6 @@ export const NewTaskModal = ({ data, handleClose, handleSave }: SourceFileProps)
           <FormikForm onSubmit={handleSubmit}>
             <Modal.Body>
               <FormRow title="Name" name="name" type="text"></FormRow>
-
-              <FormRow title="Output method" name="outputMethod" as="select">
-                {generateOptions(OutputTypeMapping)}
-              </FormRow>
 
               <FormRow title="Detection model" name="detectionModel" as="select">
                 {generateOptions(DetectionModelMapping)}

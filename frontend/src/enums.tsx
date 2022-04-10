@@ -1,8 +1,3 @@
-export enum OutputType {
-  file = 'file',
-  video = 'video',
-}
-
 export enum DetectionModel {
   efficientdet_d6 = 'efficientdet_d6',
   efficientdet_d5_adv_prop = 'efficientdet_d5_adv_prop',

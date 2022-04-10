@@ -18,7 +18,6 @@ export class SourceFileClient extends HttpClient {
     name: string,
     detectionModel: string,
     trackingModel: string,
-    method: string,
     parameters: { [id: string]: string | number }
   ) =>
     this.instance
@@ -26,7 +25,6 @@ export class SourceFileClient extends HttpClient {
         name: name,
         detection_model: detectionModel,
         tracking_model: trackingModel,
-        method: method,
         parameters: parameters,
       })
       .then(response => response.data);

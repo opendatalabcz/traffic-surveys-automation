@@ -1,4 +1,4 @@
-from sqlalchemy import ARRAY, Column, Enum, ForeignKey, Integer, JSON, MetaData, Table, TEXT
+from sqlalchemy import ARRAY, JSON, TEXT, Column, Enum, ForeignKey, Integer, MetaData, Table
 
 from tsa import enums
 
@@ -48,12 +48,6 @@ TaskModel = Table(
         nullable=False,
         default="{}",
         doc="List of models to use when processing the task. Usually, it's one detector and one tracker.",
-    ),
-    Column(
-        "output_method",
-        Enum(enums.TaskOutputMethod, name="task_output_method"),
-        nullable=False,
-        doc="Method used for creating an output of the task.",
     ),
     Column("output_path", TEXT, unique=True, nullable=False, doc="Output file generated as a result of a task."),
     Column(

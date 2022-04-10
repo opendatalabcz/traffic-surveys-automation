@@ -1,9 +1,10 @@
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pydantic import BaseModel, Field, validator
-from tsa import enums
 
+from tsa import enums
 from tsa.config import CONFIGURABLE_VARIABLES
+
 from .line import LinesBase
 
 PARAMETERS_TYPE = Dict[str, Union[float, int]]
@@ -18,7 +19,6 @@ class Task(BaseModel):
     models: Tuple[str, ...] = Field(
         description="List of models to use when processing the task. Usually, it's one detector and one tracker.",
     )
-    output_method: enums.TaskOutputMethod = Field(description="Method used for creating an output of the task.")
     output_path: str = Field(description="Output file generated as a result of a task.")
     parameters: Dict[str, Any] = Field(
         description="Parameters of the models. These override the default parameters of the app."
@@ -36,12 +36,12 @@ class NewTask(BaseModel):
     name: str
     detection_model: enums.DetectionModels
     tracking_model: enums.TrackingModel
-    method: enums.TaskOutputMethod
     parameters: PARAMETERS_TYPE
 
     @validator("parameters")
     def correct_parameters(cls, v: PARAMETERS_TYPE) -> PARAMETERS_TYPE:
-        diff = set(v.keys()).difference(CONFIGURABLE_VARIABLES)
+        diff = set(v.keys()).difference(set(CONFIGURABLE_VARIABLES.keys()))
         if diff:
             raise ValueError(f"Parameters contain unexpected variables: {', '.join(diff)}")
-        return v
+        # cast the parameters to their correct types
+        return {key: CONFIGURABLE_VARIABLES[key](value) for key, value in v.items()}

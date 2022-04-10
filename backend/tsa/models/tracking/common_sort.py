@@ -3,9 +3,9 @@ from typing import List, Tuple
 
 import numpy as np
 
-from tsa.models import TrackableModel
 from tsa.typing import MATCHED_BBOXES, MATCHED_IDS
 
+from ..abstract import TrackableModel
 from .tracker import Tracker
 
 

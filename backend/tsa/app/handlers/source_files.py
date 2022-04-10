@@ -109,6 +109,4 @@ async def create_task(
     if source_file.status == enums.SourceFileStatus.deleted:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Can't create a task for deleted source file.")
 
-    await source_file_repository.update_state(source_file_id, enums.SourceFileStatus.processing)
-
     return await perform_create_task(task_repository, task_data, source_file_id, source_file.path)

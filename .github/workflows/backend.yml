@@ -19,7 +19,7 @@ jobs:
         with:
           options: "-l 120 -t py39 --check --verbose"
           src: "./backend/tsa ./backend/cli"
-          version: "21.10b0"
+          version: "22.3.0"
 
   build:
     runs-on: ubuntu-latest

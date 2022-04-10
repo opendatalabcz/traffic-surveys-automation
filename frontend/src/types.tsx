@@ -1,4 +1,4 @@
-import { OutputType, SourceFileStatus, TaskStatus } from './enums';
+import { SourceFileStatus, TaskStatus } from './enums';
 
 export type Line = {
   name: string;
@@ -39,7 +39,6 @@ export type SourceFileWithTasks = SourceFile & {
 export type Task = {
   id: number;
   source_file_id: number;
-  output_method: OutputType;
   output_path: string;
   status: TaskStatus;
   models: string[];

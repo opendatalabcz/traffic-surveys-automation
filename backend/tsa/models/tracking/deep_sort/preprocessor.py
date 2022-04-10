@@ -1,6 +1,6 @@
 import tensorflow as tf
 
-from tsa.tf_utils import optional_resize_with_pad
+from tsa.tf_utils import optional_resize_with_crop_or_pad
 
 
 def _frame_to_boxes(input_data):
@@ -9,7 +9,7 @@ def _frame_to_boxes(input_data):
     def transformation():
         return tf.map_fn(
             lambda bbox: tf.RaggedTensor.from_tensor(
-                optional_resize_with_pad(frame[bbox[1] : bbox[3], bbox[0] : bbox[2]], 32, 32)
+                optional_resize_with_crop_or_pad(frame[bbox[1] : bbox[3], bbox[0] : bbox[2]], 32, 48, 150, 224)
             ),
             frame_detections,
             infer_shape=False,

@@ -1,12 +1,8 @@
-from collections import defaultdict
-from itertools import permutations
-from typing import Dict
-
 from fastapi import APIRouter, Depends, status
 
-from tsa.app.schemas import LinesResponse
 from tsa.app.repositories.lines import LinesRepository
 from tsa.app.repositories.task import TaskRepository
+from tsa.app.schemas import LinesResponse
 from tsa.config import config
 from tsa.dataclasses.geometry import Line
 from tsa.processes.count_vehicles import count_vehicles as perform_count_vehicles

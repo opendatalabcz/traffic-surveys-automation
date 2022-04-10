@@ -1,7 +1,7 @@
 from abc import abstractmethod
-from typing import Any, List, Tuple
+from typing import Any, Tuple
 
-from tsa.datasets import FramesDataset
+from tsa.dataclasses.frames import FramesDataset
 
 
 class PredictableModel:

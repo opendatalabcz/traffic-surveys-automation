@@ -3,7 +3,7 @@ from typing import Callable, Generic, List, TypeVar
 from databases import Database
 from fastapi import Depends
 from pydantic import BaseModel
-from sqlalchemy import and_, delete, insert, select, Table, update
+from sqlalchemy import Table, and_, delete, insert, select, update
 
 from tsa.app.database import get_db_connection
 from tsa.app.exceptions import NotFoundError
@@ -14,6 +14,8 @@ K = TypeVar("K", Callable, BaseModel)
 class DatabaseRepository(Generic[K]):
     model: Table
     data_class: K
+
+    sort_keys: List = []
 
     def __init__(self, connection: Database = Depends(get_db_connection)):
         self._connection = connection
@@ -41,6 +43,8 @@ class DatabaseRepository(Generic[K]):
 
         if conditions:
             statement = statement.where(and_(*conditions))
+
+        statement = statement.order_by(*self.sort_keys)
 
         results = await self._connection.fetch_all(statement)
         return [self.data_class(**result) for result in results]

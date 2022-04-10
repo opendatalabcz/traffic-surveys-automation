@@ -6,11 +6,11 @@ from tsa.dataclasses.track import FinalTrack
 
 class WriteStorageMethod(ABC):
     @abstractmethod
-    def save_frame(self, frame, detections, identifiers, classes, scores):
+    def save_frame(self, frame, detections, identifiers, classes, scores) -> None:
         ...
 
     @abstractmethod
-    def close(self):
+    def close(self) -> None:
         ...
 
 

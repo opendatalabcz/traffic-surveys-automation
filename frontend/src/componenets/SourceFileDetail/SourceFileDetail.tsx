@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 
 import { SourceFileClient } from '../../api/source-file';
-import { OutputType, TaskStatus } from '../../enums';
+import { TaskStatus } from '../../enums';
 import { DetectionModelMapping, SourceFileTaskColorMapping, TrackingModelMapping } from '../../mappings';
 import { SourceFileWithTasks, Task } from '../../types';
 import { LoadingView, TitleView } from '../views';
@@ -22,20 +22,19 @@ const TaskRow = ({ data }: TaskRowProps) => (
       <span className="badge bg-primary me-1">{DetectionModelMapping[data.models[0]]}</span>
       <span className="badge bg-secondary">{TrackingModelMapping[data.models[1]]}</span>
     </td>
-    <td>{data.output_method}</td>
     <td className="text-end">{data.status}</td>
     <td className="text-end">
-      {data.output_method == OutputType.file && data.status == TaskStatus.completed && (
-        <Link to={`/task/${data.id}`} className="btn btn-sm btn-outline-primary me-1">
-          <i className="bi bi-distribute-vertical"></i>
-          <span className="ms-1">Lines</span>
-        </Link>
-      )}
-      {data.output_method == OutputType.video && data.status == TaskStatus.completed && (
-        <Link to={`/task/${data.id}`} className="btn btn-sm btn-outline-primary me-1">
-          <i className="bi bi-play"></i>
-          <span className="ms-1">Play</span>
-        </Link>
+      {data.status == TaskStatus.completed && (
+        <div>
+          <Link to={`/task/${data.id}`} className="btn btn-sm btn-outline-primary me-1">
+            <i className="bi bi-distribute-vertical"></i>
+            <span className="ms-1">Lines</span>
+          </Link>
+          <Link to={`/task/${data.id}`} className="btn btn-sm btn-outline-primary me-1">
+            <i className="bi bi-play"></i>
+            <span className="ms-1">Play</span>
+          </Link>
+        </div>
       )}
     </td>
   </tr>
@@ -54,7 +53,6 @@ const Detail = ({ data }: DetailProps) => (
         <tr>
           <th>#</th>
           <th>Models</th>
-          <th>Method</th>
           <th className="text-end">Status</th>
           <th className="text-end">Actions</th>
         </tr>

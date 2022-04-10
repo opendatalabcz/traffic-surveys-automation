@@ -1,5 +1,6 @@
 from abc import abstractmethod
 from collections import namedtuple
+from pathlib import Path
 from typing import Generator, Optional
 
 import tensorflow as tf
@@ -7,8 +8,7 @@ import tensorflow as tf
 from tsa import typing
 from tsa.cv2.video_capture import VideoCapture
 
-
-VideoStatistics = namedtuple("VideoStatistics", ("frame_rate", "resolution"))
+VideoStatistics = namedtuple("VideoStatistics", ("frame_rate", "resolution", "duration"))
 
 
 def get_frame_rate_for_video(video: VideoCapture, expected_frames: Optional[int]) -> int:
@@ -44,7 +44,7 @@ class FramesDataset:
 
 class VideoFramesDataset(FramesDataset):
     def __init__(
-        self, file_path: str, output_frame_rate: Optional[int] = None, max_yielded_frames: Optional[int] = None
+        self, file_path: Path, output_frame_rate: Optional[int] = None, max_yielded_frames: Optional[int] = None
     ):
         """Initialize a dataset of video frames.
 
@@ -52,7 +52,7 @@ class VideoFramesDataset(FramesDataset):
         @param output_frame_rate FPS of the yielded frames, FPS not changed if not provided
         @param max_yielded_frames maximum number of yielded frames
         """
-        self.file_path = file_path
+        self.file_path = str(file_path)
         self.max_frames = max_yielded_frames
         self.output_frame_rate = output_frame_rate
 
@@ -77,7 +77,7 @@ class VideoFramesDataset(FramesDataset):
             if frame_rate is None or video.frame_rate < frame_rate:
                 frame_rate = video.frame_rate
 
-            return VideoStatistics(frame_rate=frame_rate, resolution=video.resolution)
+            return VideoStatistics(frame_rate=frame_rate, resolution=video.resolution, duration=video.duration)
 
     def _stop(self, current_frame: int) -> bool:
         return self.max_frames is not None and current_frame >= self.max_frames

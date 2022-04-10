@@ -21,6 +21,12 @@ class VideoCapture:
         height = self._video.get(cv2.CAP_PROP_FRAME_HEIGHT)
         return int(width), int(height)
 
+    @property
+    def duration(self) -> int:
+        """Number of seconds the video takes."""
+        frames_count = self._video.get(cv2.CAP_PROP_FRAME_COUNT)
+        return int(frames_count / self.frame_rate)
+
     def read_frames(self, rate: int = 1) -> Generator[NP_FRAME, None, None]:
         while True:
             read, frame = self._video.read()
