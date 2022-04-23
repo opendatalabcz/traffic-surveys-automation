@@ -1,4 +1,4 @@
-from typing import Callable, Generic, List, TypeVar
+from typing import Callable, List, TypeVar
 
 from databases import Database
 from fastapi import Depends
@@ -11,7 +11,7 @@ from tsa.app.exceptions import NotFoundError
 K = TypeVar("K", Callable, BaseModel)
 
 
-class DatabaseRepository(Generic[K]):
+class DatabaseRepository:
     model: Table
     data_class: K
 

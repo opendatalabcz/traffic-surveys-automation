@@ -9,10 +9,16 @@ RUN apt-get update &&\
     pip install poetry &&\
     poetry config virtualenvs.create false
 
-COPY poetry.lock pyproject.toml ./
+COPY alembic.ini poetry.lock pyproject.toml ./
 
 RUN poetry install --no-dev
+
+COPY migrations/ ./migrations
 
 COPY cli/ ./cli
 
 COPY tsa/ ./tsa
+
+CMD [ "uvicorn", "--host", "0.0.0.0", "--port", "80", "tsa.app.app:fast_app"]
+
+EXPOSE 80

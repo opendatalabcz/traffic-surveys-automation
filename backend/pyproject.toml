@@ -1,6 +1,6 @@
 [tool.poetry]
-name = "traffic_survey_automator"
-version = "0.1.0"
+name = "traffic-survey-automator-be"
+version = "1.0.0"
 description = """
     Backend for traffic survey automation sofware which uses deep learning and machine learning for detecting and
     tracking vehilces in videos.
@@ -49,5 +49,5 @@ build-backend = "poetry.core.masonry.api"
 black = "black -l 120 -t py39 tsa/ cli/"
 sort = "isort cli/ migrations/ test/ tsa/"
 test = "pytest test/"
-run = "uvicorn tsa.app.app:fast_app --reload"
+run = "uvicorn tsa.app.app:fast_app"
 worker = "celery -A tsa.app.celery:celery_app worker -c 1"
