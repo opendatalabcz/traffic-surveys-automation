@@ -1,6 +1,6 @@
 [tool.poetry]
-name = "traffic_survey_automator"
-version = "0.1.0"
+name = "traffic-survey-automator-be"
+version = "1.0.0"
 description = """
     Backend for traffic survey automation sofware which uses deep learning and machine learning for detecting and
     tracking vehilces in videos.

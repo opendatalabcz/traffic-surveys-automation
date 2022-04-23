@@ -7,7 +7,7 @@ from tsa.app.schemas.task import Task
 from .base import DatabaseRepository
 
 
-class TaskRepository(DatabaseRepository[Task]):
+class TaskRepository(DatabaseRepository):
     model = TaskModel
     data_class = Task
     sort_keys = [TaskModel.c.id]

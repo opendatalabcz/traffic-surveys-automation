@@ -9,7 +9,7 @@ from tsa.app.schemas.source_file import SourceFileBase
 from .base import DatabaseRepository
 
 
-class SourceFileRepository(DatabaseRepository[SourceFileBase]):
+class SourceFileRepository(DatabaseRepository):
     model = SourceFileModel
     data_class = SourceFileBase
     sort_keys = [SourceFileModel.c.path]

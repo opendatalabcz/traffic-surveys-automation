@@ -1,0 +1,58 @@
+version: "3.9"
+
+services:
+  tsa-database:
+    image: postgres:14
+    container_name: tsa-database
+    environment:
+      POSTGRES_DB: tsa
+      POSTGRES_USER: tsa
+      POSTGRES_PASSWORD: tsa
+    volumes:
+      - ../postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tsa"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  tsa-redis:
+    image: redis:6
+    container_name: tsa-redis
+
+  tsa-backend:
+    image: ghcr.io/opendatalabcz/traffic-surveys-automation-be:master
+    build:
+      context: backend/.
+    container_name: tsa-backend
+    environment:
+      DATABASE_NAME: tsa
+      DATABASE_URL: tsa:tsa@tsa-database:5432
+      CELERY_BROKER: redis://tsa-redis/0
+      MODELS_PATH: "/models"
+      SOURCE_FILES_PATH: "/source_files"
+      OUTPUT_FILES_PATH: "/output_analyses"
+    volumes:
+      - ../models:/models
+      - ../input_video:/source_files
+      - ../output_analyses:/output_analyses
+    ports:
+      - 8000:80
+    command: >
+      sh -c "alembic upgrade head &&
+             uvicorn --host 0.0.0.0 --port 80 tsa.app.app:fast_app"
+    depends_on:
+      tsa-database:
+        condition: service_healthy
+
+  tsa-frontend:
+    image: ghcr.io/opendatalabcz/traffic-surveys-automation-fe:master
+    build:
+      context: frontend/.
+    container_name: tsa-frontend
+    environment:
+      API_URL: http://localhost:8000
+    ports:
+      - 3000:80
+    links:
+      - tsa-backend

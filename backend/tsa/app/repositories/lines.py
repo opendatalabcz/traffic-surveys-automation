@@ -6,7 +6,7 @@ from tsa.app.schemas.line import Lines, LinesBase
 from .base import DatabaseRepository
 
 
-class LinesRepository(DatabaseRepository[LinesBase]):
+class LinesRepository(DatabaseRepository):
     model = LineModel
     data_class = LinesBase
     sort_keys = [LineModel.c.id]
