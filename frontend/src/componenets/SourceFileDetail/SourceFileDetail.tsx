@@ -22,6 +22,7 @@ const TaskRow = ({ data }: TaskRowProps) => (
       <span className="badge bg-primary me-1">{DetectionModelMapping[data.models[0]]}</span>
       <span className="badge bg-secondary">{TrackingModelMapping[data.models[1]]}</span>
     </td>
+    <td>{data.output_path}</td>
     <td className="text-end">{data.status}</td>
     <td className="text-end">
       {data.status == TaskStatus.completed && (
@@ -53,6 +54,7 @@ const Detail = ({ data }: DetailProps) => (
         <tr>
           <th>#</th>
           <th>Models</th>
+          <th>File</th>
           <th className="text-end">Status</th>
           <th className="text-end">Actions</th>
         </tr>
