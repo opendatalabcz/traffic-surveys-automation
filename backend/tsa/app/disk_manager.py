@@ -6,7 +6,7 @@ from tsa.config import config
 
 
 class DiskManager:
-    ALLOWED_SOURCE_FORMATS = ("mp4",)
+    ALLOWED_SOURCE_FORMATS = ("mp4", "mov")
 
     def __init__(self):
         self.source_files_dir: Path = config.SOURCE_FILES_PATH
