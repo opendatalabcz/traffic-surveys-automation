@@ -11,13 +11,13 @@ from tsa.config import config, config_to_dict
 class NoopMonitor:
     def __init__(self) -> None:
         self.monitor = {}
-    
+
     def stop(self):
         pass
 
     def analysis(self, generator):
         yield from generator
-    
+
     def duration(self, _, generator_function, *args, **kwargs):
         yield from generator_function(*args, **kwargs)
 
@@ -27,10 +27,10 @@ class NeptuneMonitor:
         self.monitor = neptune.init_run(project=config.NEPTUNE_PROJECT, api_token=config.NEPTUNE_API_KEY, name=name)
         self.monitor["sys/tags"].add(tags)
         self.monitor["parameters"] = config_to_dict()
-    
+
     def stop(self):
         self.monitor.stop()
-    
+
     def analysis(self, generator):
         batch_counter = 1
 
@@ -41,7 +41,7 @@ class NeptuneMonitor:
             yield batch
 
             batch_counter += 1
-    
+
     def duration(self, name, generator_function, *args, **kwargs):
         generator_call = generator_function(*args, **kwargs)
 
