@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import React, { useEffect, useRef, useState } from 'react';
 import { useResizeDetector } from 'react-resize-detector';
 import { useImageSize } from '../hooks';

@@ -3,7 +3,7 @@ import { Line, Task, TaskConfiguration } from '../types';
 
 export class TaskClient extends HttpClient {
   public constructor() {
-    super('http://localhost:8000/task');
+    super('/task');
   }
 
   public getConfiguration = () => this.instance.get<TaskConfiguration>('configuration').then(response => response.data);

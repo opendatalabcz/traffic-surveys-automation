@@ -64,7 +64,11 @@ export const NewTaskModal = ({ data, handleClose, handleSave }: SourceFileProps)
     ));
 
   return (
-    <Formik initialValues={initialValues} enableReinitialize={true} onSubmit={values => handleSave(data!.id, values)}>
+    <Formik
+      initialValues={initialValues}
+      enableReinitialize={true}
+      onSubmit={values => data && handleSave(data.id, values)}
+    >
       {({ handleSubmit, setFieldValue }) => (
         <Modal show={data !== undefined} onHide={handleClose} backdrop="static" keyboard={false} size="lg">
           <Modal.Header closeButton>

@@ -3,7 +3,7 @@ import { Counts } from '../types';
 
 export class LinesClient extends HttpClient {
   public constructor() {
-    super('http://localhost:8000/lines');
+    super('/lines');
   }
 
   public getCounts = (linesId: number) => this.instance.get<Counts>(`${linesId}`).then(response => response.data);

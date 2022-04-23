@@ -3,7 +3,7 @@ import { SourceFile, SourceFileWithTasks, Task } from '../types';
 
 export class SourceFileClient extends HttpClient {
   public constructor() {
-    super('http://localhost:8000/source_file');
+    super('/source_file');
   }
 
   public getSourceFiles = () => this.instance.get<SourceFile[]>('').then(response => response.data);
