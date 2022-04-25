@@ -5,7 +5,7 @@ from tsa.app.database import db_engine
 from tsa.app.exceptions import NotFoundError
 from tsa.app.handlers import lines, source_files, tasks
 
-fast_app = FastAPI()
+fast_app = FastAPI(version="1.0")
 
 fast_app.include_router(source_files.router)
 fast_app.include_router(tasks.router)

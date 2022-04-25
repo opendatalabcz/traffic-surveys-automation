@@ -68,20 +68,22 @@ The application's backend runs on **Python 3.8** and **3.9** using `poetry` depe
 one of the required versions of Python and poetry installed. Then, follow the steps below.
 
 1. Run `poetry install` inside the `backend/` folder.
-2. Export the necessary envornment variables and create the required folders to store data. It is the set of 6
+2. Download the deep learning models and place them into the `models/` folder.
+3. Export the necessary envornment variables and create the required folders to store data. It is the set of 6
    variables defined in the `docker-compose.yaml`, `tsa-backend`.
-3. Optionally, `neptune.ai` project name and api key can be set up to monitor the experiments via Neptune. See
+4. Optionally, `neptune.ai` project name and api key can be set up to monitor the experiments via Neptune. See
    `tsa.config.base` how to set these.
-4. Download the deep learning models and place them into the `models/` folder.
-5. Run a CLI utility command located in `cli/` package. Refer to the documentation of those commands by running
+5. Activate the virtual environment `poetry shell`.
+6. Apply migrations through `alembic upgrade head`, if necessary.
+7. Run a CLI utility command located in `cli/` package. Refer to the documentation of those commands by running
    `python cli/*.py --help`.
-6. There is a set of `poe-the-poet` commands predefined for quick execution:
-
-- `poe black` to format the code,
-- `poe sort` to sort imports,
-- `poe test` to run those few tests,
-- `poe run` to **start the backend application** on port `8000`,
-- `poe worker` to start the celery worker that processes the analyses queue.
+8. Start the **uvicorn** server `uvicorn --port 8000 tsa.app.app:fast_app`
+9. There is a set of `poe-the-poet` commands predefined for quick execution:
+   - `poe black` to format the code,
+   - `poe sort` to sort imports,
+   - `poe test` to run those few tests,
+   - `poe run` to **start the backend application** on port `8000`,
+   - `poe worker` to start the celery worker that processes the analyses queue.
 
 To run the application's frontend:
 

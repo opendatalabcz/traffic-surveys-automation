@@ -22,8 +22,6 @@ services:
 
   tsa-backend:
     image: ghcr.io/opendatalabcz/traffic-surveys-automation-be:master
-    build:
-      context: backend/.
     container_name: tsa-backend
     environment:
       DATABASE_NAME: tsa
@@ -37,7 +35,7 @@ services:
       - ../input_video:/source_files
       - ../output_analyses:/output_analyses
     ports:
-      - 8000:80
+      - "8000:80"
     command: >
       sh -c "alembic upgrade head &&
              uvicorn --host 0.0.0.0 --port 80 tsa.app.app:fast_app"
@@ -47,12 +45,10 @@ services:
 
   tsa-frontend:
     image: ghcr.io/opendatalabcz/traffic-surveys-automation-fe:master
-    build:
-      context: frontend/.
     container_name: tsa-frontend
     environment:
       API_URL: http://localhost:8000
     ports:
-      - 3000:80
+      - "3000:80"
     links:
       - tsa-backend
