@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import tensorflow as tf
 
 from tsa.dataclasses.frames import VideoFramesDataset
@@ -5,7 +7,7 @@ from tsa.models.tracking import DeepSORT
 
 
 def test_deep_sort():
-    video = VideoFramesDataset("/Users/ondrejpudis/traffic_survey_automation/datasets/jackson-hole_20210507_1.mp4")
+    video = VideoFramesDataset(Path(__file__).parent / "../test_data/test_video.mp4")
     tracking_model = DeepSORT(0, 3, 0.5, 0.4, 100)
 
     def track(bboxes):
