@@ -14,6 +14,7 @@ def iou_batch(bb_test, bb_gt):
     """Compute an intersection over union on a batch of bounding boxes.
 
     Adopted from https://github.com/abewley/sort/blob/bce9f0d1fc8fb5f45bf7084130248561a3d42f31/sort.py#L47.
+    The LICENCE is the same as of our project, stated at the root level of the repository.
     """
     bb_gt = np.expand_dims(bb_gt, 0)
     bb_test = np.expand_dims(bb_test, 1)

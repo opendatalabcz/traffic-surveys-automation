@@ -8,7 +8,9 @@ def associate_detections_to_trackers(detections, trackers, iou_threshold: float)
     """Assigns detections to tracked object, both represented as bounding boxes.
 
     Returns 3 lists of matches, unmatched_detections and unmatched_trackers.
-    Adopted from https://github.com/abewley/sort/blob/bce9f0d1fc8fb5f45bf7084130248561a3d42f31/sort.py#L154.
+
+    Forked from https://github.com/abewley/sort/blob/bce9f0d1fc8fb5f45bf7084130248561a3d42f31/sort.py#L154.
+    The LICENCE is the same as of our project, stated at the root level of the repository.
     """
     if len(trackers) == 0:
         return np.empty((0, 2), dtype=int), np.arange(len(detections)), np.empty((0, 5), dtype=int)
