@@ -21,7 +21,7 @@ services:
     container_name: tsa-redis
 
   tsa-backend:
-    image: ghcr.io/opendatalabcz/traffic-surveys-automation-be:master
+    image: ghcr.io/opendatalabcz/traffic-surveys-automation-be:latest
     container_name: tsa-backend
     environment:
       DATABASE_NAME: tsa
@@ -44,7 +44,7 @@ services:
         condition: service_healthy
 
   tsa-frontend:
-    image: ghcr.io/opendatalabcz/traffic-surveys-automation-fe:master
+    image: ghcr.io/opendatalabcz/traffic-surveys-automation-fe:latest
     container_name: tsa-frontend
     environment:
       API_URL: http://localhost:8000

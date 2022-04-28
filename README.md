@@ -51,7 +51,7 @@ The database URL should be without `postgresql://` prefix. This is added automat
 
 Four folders are necessary:
 
-- **sorce_files:** the source video recordings
+- **source_files:** the source video recordings
 - **output_analyses:** the output JSON analysis data are stored here
 - **models:** source of the deep learning models checkpoints
 - **postgres_data:** place where the docker-composed PostgreSQL stores its data
