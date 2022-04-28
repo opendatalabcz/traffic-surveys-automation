@@ -20,6 +20,7 @@ RUN apk add --update nodejs &&\
 
 COPY --from=build /app/build .
 COPY --from=build /app/.env.example ./.env
+COPY --from=build /app/nginx.conf /etc/nginx/conf.d/default.conf
 
 ENTRYPOINT ["/bin/sh", "-c", "runtime-env-cra && nginx -g \"daemon off;\""]
 

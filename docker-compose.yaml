@@ -29,11 +29,11 @@ services:
       CELERY_BROKER: redis://tsa-redis/0
       MODELS_PATH: "/models"
       SOURCE_FILES_PATH: "/source_files"
-      OUTPUT_FILES_PATH: "/output_analyses"
+      OUTPUT_FILES_PATH: "/output_analysis"
     volumes:
       - ../models:/models
       - ../input_video:/source_files
-      - ../output_analyses:/output_analyses
+      - ../output_analysis:/output_analysis
     ports:
       - "8000:80"
     command: >

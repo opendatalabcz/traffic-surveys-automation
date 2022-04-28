@@ -32,7 +32,7 @@ workers asynchronously.
 
 ## Download models
 
-The common prerequirement is to download the pre-trained deep learning models for object detection. How we created
+The common pre-requirement is to download the pre-trained deep learning models for object detection. How we created
 these checkpoints is described in section _Exporting models_ below. The models have to be downloaded and stored in the
 `MODELS_PATH`.
 
@@ -52,12 +52,12 @@ The database URL should be without `postgresql://` prefix. This is added automat
 Four folders are necessary:
 
 - **source_files:** the source video recordings
-- **output_analyses:** the output JSON analysis data are stored here
+- **output_analysis:** the output JSON analysis data are stored here
 - **models:** source of the deep learning models checkpoints
 - **postgres_data:** place where the docker-composed PostgreSQL stores its data
 
-All of these locations are mounted from the local system and the necessary environment variables are set-up. Please,
-adjust those if needed.
+All of these locations are mounted from the local system and the necessary environment variables are set up. Please,
+adjust those, if needed.
 
 By default, backend is available on `http://localhost:8000` and frontend on `http://localhost:3000`. You can adjust the
 ports.
@@ -69,7 +69,7 @@ one of the required versions of Python and poetry installed. Then, follow the st
 
 1. Run `poetry install` inside the `backend/` folder.
 2. Download the deep learning models and place them into the `models/` folder.
-3. Export the necessary envornment variables and create the required folders to store data. It is the set of 6
+3. Export the necessary environment variables and create the required folders to store data. It is the set of 6
    variables defined in the `docker-compose.yaml`, `tsa-backend`.
 4. Optionally, `neptune.ai` project name and api key can be set up to monitor the experiments via Neptune. See
    `tsa.config.base` how to set these.
