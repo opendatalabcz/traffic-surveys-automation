@@ -60,7 +60,6 @@ class KalmanFilter:
         self.kalman_filter.statePost = np.array([*initial_position, 0, 0, 0, 0, 0, 0], dtype=np.float32).reshape(-1, 1)
 
         # set initial error covariance matrix
-        std_position_weight, std_velocity_weight, height = 1.0 / 20, 1.0 / 160, initial_position[3]
         self.kalman_filter.errorCovPost = diagonal(100.0, 1_000.0, repeats=(4, 6))
 
     @classmethod
